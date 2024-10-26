@@ -52,7 +52,7 @@ interface ProductVariations {
         }
     ]
     });
-    const jsonString = msg.content[0].text.match(/\{[\s\S]*\}/)?.[0];
+    const jsonString = msg.content[0].type === 'text' ? msg.content[0].text.match(/\{[\s\S]*\}/)?.[0]: null;
   
     if (!jsonString) {
       throw new Error("Failed to extract JSON from the response");
