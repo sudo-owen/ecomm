@@ -34,6 +34,16 @@ export class ProductService {
 
   constructor() {}
 
+  restockProduct(productId: number, quantity: number): void {
+    const currentProducts = this.productsSubject.value;
+    const product = currentProducts.find(p => p.id === productId);
+    
+    if (product) {
+      product.stock += quantity;
+      this.productsSubject.next([...currentProducts]);
+    }
+  }
+
   // Get all products
   getProducts(): Observable<Product[]> {
     return this.productsSubject.asObservable();
