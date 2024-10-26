@@ -1,0 +1,41 @@
+<!-- components/product-detail/product-detail.component.html -->
+<div class="container mx-auto px-4 py-8" *ngIf="product">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div class="rounded-lg overflow-hidden">
+        <img [src]="product.imageUrl" 
+             [alt]="product.name"
+             class="w-full h-auto">
+      </div>
+  
+      <div class="flex flex-col">
+        <h1 class="text-3xl font-bold mb-4">{{ product.name }}</h1>
+        <p class="text-gray-600 mb-6">{{ product.description }}</p>
+        
+        <div class="text-2xl font-bold mb-4">${{ product.price }}</div>
+        
+        <div class="text-sm text-gray-500 mb-6">
+          Stock Available: {{ product.stock }}
+        </div>
+        
+        <div class="flex items-center gap-4 mb-6">
+          <label class="text-gray-600">Quantity:</label>
+          <select #myInput [(ngModel)]="quantity" 
+                  (change)="updateQuantity(myInput.value)"
+                  [disabled]="product.stock === 0"
+                  class="border rounded-md px-2 py-1">
+            <option *ngFor="let num of [1,2,3,4,5]" 
+                    [value]="num"
+                    [disabled]="num > product.stock">
+              {{ num }}
+            </option>
+          </select>
+        </div>
+  
+        <button (click)="addToCart()"
+                [disabled]="product.stock === 0"
+                class="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition-colors disabled:bg-gray-400">
+          {{ product.stock === 0 ? 'Out of Stock' : 'Add to Cart' }}
+        </button>
+      </div>
+    </div>
+  </div>
