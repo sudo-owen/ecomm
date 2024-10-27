@@ -5,6 +5,18 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
 import bootstrap from './src/main.server';
 
+const PRODUCT_CONFIG = 'PRODUCT_CONFIG';
+
+interface UserContext {
+  experimentGroup: 'A' | 'B';
+}
+
+async function determineUserContext(req: express.Request): Promise<UserContext> {
+  return {
+    experimentGroup: 'A'
+  };
+}
+
 // The Express app is exported so that it can be used by serverless Functions.
 export function app(): express.Express {
   const server = express();
@@ -35,7 +47,10 @@ export function app(): express.Express {
         documentFilePath: indexHtml,
         url: `${protocol}://${headers.host}${originalUrl}`,
         publicPath: browserDistFolder,
-        providers: [{ provide: APP_BASE_HREF, useValue: baseUrl }],
+        providers: [
+          { provide: APP_BASE_HREF, useValue: baseUrl },
+          { provide: PRODUCT_CONFIG, useValue: 'PRODUCT_CONFIG' }
+        ],
       })
       .then((html) => res.send(html))
       .catch((err) => next(err));
