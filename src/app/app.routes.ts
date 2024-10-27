@@ -6,20 +6,20 @@ import { CheckoutComponent } from './components/checkout/checkout.component';
 
 export const routes: Routes = [
   { path: '', component: LandingPageComponent },
-  { 
-    path: 'products', 
-    component: ProductGridComponent 
+  {
+    path: 'products',
+    component: ProductGridComponent,
   },
-  { 
-    path: 'products/:id', 
-    component: ProductDetailComponent 
+  {
+    path: 'products/:id',
+    component: ProductDetailComponent,
   },
   {
     path: 'checkout',
-    component: CheckoutComponent
+    component: CheckoutComponent,
   },
-  { 
-    path: '**', 
-    redirectTo: '' 
-  }
+  {
+    path: '**',
+    redirectTo: '',
+  },
 ];

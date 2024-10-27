@@ -13,7 +13,7 @@ import { NgFor, NgIf } from '@angular/common';
   templateUrl: './product-detail.component.html',
   styleUrls: ['./product-detail.component.css'],
   imports: [FormsModule, NgFor, NgIf],
-  standalone: true
+  standalone: true,
 })
 export class ProductDetailComponent implements OnInit, OnDestroy {
   product!: Product;
@@ -24,23 +24,25 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private productService: ProductService,
-    private cartService: CartService
+    private cartService: CartService,
   ) {}
 
   ngOnInit(): void {
     this.subscription.add(
-      this.route.params.subscribe(params => {
+      this.route.params.subscribe((params) => {
         const productId = Number(params['id']);
         this.loadProduct(productId);
-      })
+      }),
     );
     this.subscription.add(
-      this.cartService.getItemRemovedObservable().subscribe(({productId, quantity}) => {
-        if (productId === this.product?.id) {
-          this.productService.restockProduct(productId, quantity);
-          this.loadProduct(productId); // Reload the product to update the stock
-        }
-      })
+      this.cartService
+        .getItemRemovedObservable()
+        .subscribe(({ productId, quantity }) => {
+          if (productId === this.product?.id) {
+            this.productService.restockProduct(productId, quantity);
+            this.loadProduct(productId); // Reload the product to update the stock
+          }
+        }),
     );
   }
 
@@ -50,14 +52,14 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
 
   private loadProduct(productId: number): void {
     this.subscription.add(
-      this.productService.getProduct(productId).subscribe(product => {
+      this.productService.getProduct(productId).subscribe((product) => {
         if (product) {
           this.product = product;
           this.quantity = 1; // Reset quantity when loading new product
         } else {
           this.router.navigate(['/not-found']);
         }
-      })
+      }),
     );
   }
 

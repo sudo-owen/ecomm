@@ -1,6 +1,11 @@
 // checkout.component.ts
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { CartService } from '../../services/cart.service';
 import { CartItem } from '../../models/interfaces';
 import { CommonModule, NgFor } from '@angular/common';
@@ -10,7 +15,7 @@ import { CommonModule, NgFor } from '@angular/common';
   templateUrl: './checkout.component.html',
   styleUrls: ['./checkout.component.scss'],
   standalone: true,
-  imports: [NgFor, ReactiveFormsModule, CommonModule]
+  imports: [NgFor, ReactiveFormsModule, CommonModule],
 })
 export class CheckoutComponent implements OnInit {
   cartItems: CartItem[] = [];
@@ -18,7 +23,7 @@ export class CheckoutComponent implements OnInit {
 
   constructor(
     public cartService: CartService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
   ) {
     this.checkoutForm = this.fb.group({
       firstName: ['', Validators.required],
@@ -28,12 +33,12 @@ export class CheckoutComponent implements OnInit {
       paymentMethod: ['card', Validators.required],
       cardNumber: ['', Validators.required],
       expiryDate: ['', Validators.required],
-      cvv: ['', Validators.required]
+      cvv: ['', Validators.required],
     });
   }
 
   ngOnInit(): void {
-    this.cartService.getCart().subscribe(items => {
+    this.cartService.getCart().subscribe((items) => {
       this.cartItems = items;
     });
   }
@@ -50,7 +55,7 @@ export class CheckoutComponent implements OnInit {
     if (this.checkoutForm.valid) {
       console.log('Order submitted', {
         items: this.cartItems,
-        form: this.checkoutForm.value
+        form: this.checkoutForm.value,
       });
     }
   }

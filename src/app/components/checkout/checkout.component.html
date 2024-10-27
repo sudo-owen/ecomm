@@ -1,114 +1,150 @@
 <!-- checkout.component.html -->
 <div class="container mx-auto px-4 py-8">
-    <h1 class="text-3xl font-bold mb-8">Checkout</h1>
-  
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-      <!-- Cart Items -->
-      <div class="lg:col-span-2">
-        <div class="bg-white rounded-lg shadow-md p-6">
-          <h2 class="text-xl font-semibold mb-4">Cart Items</h2>
-          
-          <div *ngFor="let item of cartItems" 
-               class="flex items-center gap-4 py-4 border-b">
-            <img [src]="item.product.imageUrl" 
-                 [alt]="item.product.name"
-                 class="w-20 h-20 object-cover rounded">
-            
-            <div class="flex-grow">
-              <h3 class="font-semibold">{{ item.product.name }}</h3>
-              <p class="text-gray-600">${{ item.product.price }}</p>
-            </div>
-  
-            <select [value]="item.quantity"
-                    #myInput
-                    (change)="updateQuantity(item, myInput.value)"
-                    class="border rounded-md px-2 py-1">
-              <option *ngFor="let num of [1,2,3,4,5]" [value]="num">
-                {{ num }}
-              </option>
-            </select>
-  
-            <button (click)="removeItem(item.product.id)"
-                    class="text-red-600 hover:text-red-800">
-              <i class="fas fa-trash"></i>
-            </button>
+  <h1 class="text-3xl font-bold mb-8">Checkout</h1>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Cart Items -->
+    <div class="lg:col-span-2">
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-xl font-semibold mb-4">Cart Items</h2>
+
+        <div
+          *ngFor="let item of cartItems"
+          class="flex items-center gap-4 py-4 border-b"
+        >
+          <img
+            [src]="item.product.imageUrl"
+            [alt]="item.product.name"
+            class="w-20 h-20 object-cover rounded"
+          />
+
+          <div class="flex-grow">
+            <h3 class="font-semibold">{{ item.product.name }}</h3>
+            <p class="text-gray-600">${{ item.product.price }}</p>
           </div>
-  
-          <div class="mt-4 text-right">
-            <p class="text-xl font-bold">
-              Total: ${{ cartService.getTotal() | number:'1.2-2' }}
-            </p>
-          </div>
+
+          <select
+            [value]="item.quantity"
+            #myInput
+            (change)="updateQuantity(item, myInput.value)"
+            class="border rounded-md px-2 py-1"
+          >
+            <option *ngFor="let num of [1, 2, 3, 4, 5]" [value]="num">
+              {{ num }}
+            </option>
+          </select>
+
+          <button
+            (click)="removeItem(item.product.id)"
+            class="text-red-600 hover:text-red-800"
+          >
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+
+        <div class="mt-4 text-right">
+          <p class="text-xl font-bold">
+            Total: ${{ cartService.getTotal() | number: "1.2-2" }}
+          </p>
         </div>
       </div>
-  
-      <!-- Checkout Form -->
-      <div class="lg:col-span-1">
-        <form [formGroup]="checkoutForm" 
-              (ngSubmit)="onSubmit()"
-              class="bg-white rounded-lg shadow-md p-6">
-          <h2 class="text-xl font-semibold mb-4">Payment Details</h2>
-  
-          <div class="space-y-4">
-            <div class="grid grid-cols-2 gap-4">
-              <div>
-                <label class="block text-sm font-medium text-gray-700">First Name</label>
-                <input formControlName="firstName" 
-                       type="text"
-                       class="mt-1 block w-full border rounded-md px-3 py-2">
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700">Last Name</label>
-                <input formControlName="lastName" 
-                       type="text"
-                       class="mt-1 block w-full border rounded-md px-3 py-2">
-              </div>
-            </div>
-  
+    </div>
+
+    <!-- Checkout Form -->
+    <div class="lg:col-span-1">
+      <form
+        [formGroup]="checkoutForm"
+        (ngSubmit)="onSubmit()"
+        class="bg-white rounded-lg shadow-md p-6"
+      >
+        <h2 class="text-xl font-semibold mb-4">Payment Details</h2>
+
+        <div class="space-y-4">
+          <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium text-gray-700">Email</label>
-              <input formControlName="email" 
-                     type="email"
-                     class="mt-1 block w-full border rounded-md px-3 py-2">
+              <label class="block text-sm font-medium text-gray-700"
+                >First Name</label
+              >
+              <input
+                formControlName="firstName"
+                type="text"
+                class="mt-1 block w-full border rounded-md px-3 py-2"
+              />
             </div>
-  
             <div>
-              <label class="block text-sm font-medium text-gray-700">Address</label>
-              <textarea formControlName="address"
-                        class="mt-1 block w-full border rounded-md px-3 py-2">
-              </textarea>
+              <label class="block text-sm font-medium text-gray-700"
+                >Last Name</label
+              >
+              <input
+                formControlName="lastName"
+                type="text"
+                class="mt-1 block w-full border rounded-md px-3 py-2"
+              />
             </div>
-  
-            <div>
-              <label class="block text-sm font-medium text-gray-700">Card Number</label>
-              <input formControlName="cardNumber" 
-                     type="text"
-                     class="mt-1 block w-full border rounded-md px-3 py-2">
-            </div>
-  
-            <div class="grid grid-cols-2 gap-4">
-              <div>
-                <label class="block text-sm font-medium text-gray-700">Expiry Date</label>
-                <input formControlName="expiryDate" 
-                       type="text"
-                       placeholder="MM/YY"
-                       class="mt-1 block w-full border rounded-md px-3 py-2">
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700">CVV</label>
-                <input formControlName="cvv" 
-                       type="text"
-                       class="mt-1 block w-full border rounded-md px-3 py-2">
-              </div>
-            </div>
-  
-            <button type="submit"
-                    [disabled]="!checkoutForm.valid"
-                    class="w-full bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition-colors disabled:bg-gray-400">
-              Place Order
-            </button>
           </div>
-        </form>
-      </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Email</label>
+            <input
+              formControlName="email"
+              type="email"
+              class="mt-1 block w-full border rounded-md px-3 py-2"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700"
+              >Address</label
+            >
+            <textarea
+              formControlName="address"
+              class="mt-1 block w-full border rounded-md px-3 py-2"
+            >
+            </textarea>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700"
+              >Card Number</label
+            >
+            <input
+              formControlName="cardNumber"
+              type="text"
+              class="mt-1 block w-full border rounded-md px-3 py-2"
+            />
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700"
+                >Expiry Date</label
+              >
+              <input
+                formControlName="expiryDate"
+                type="text"
+                placeholder="MM/YY"
+                class="mt-1 block w-full border rounded-md px-3 py-2"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">CVV</label>
+              <input
+                formControlName="cvv"
+                type="text"
+                class="mt-1 block w-full border rounded-md px-3 py-2"
+              />
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            [disabled]="!checkoutForm.valid"
+            class="w-full bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition-colors disabled:bg-gray-400"
+          >
+            Place Order
+          </button>
+        </div>
+      </form>
     </div>
   </div>
+</div>
