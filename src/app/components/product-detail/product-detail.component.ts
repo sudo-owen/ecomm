@@ -34,6 +34,14 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
         this.loadProduct(productId);
       })
     );
+    this.subscription.add(
+      this.cartService.getItemRemovedObservable().subscribe(({productId, quantity}) => {
+        if (productId === this.product?.id) {
+          this.productService.restockProduct(productId, quantity);
+          this.loadProduct(productId); // Reload the product to update the stock
+        }
+      })
+    );
   }
 
   ngOnDestroy(): void {
