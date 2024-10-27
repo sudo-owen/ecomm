@@ -1,11 +1,11 @@
 // components/product-grid/product-grid.component.ts
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Router, RouterModule } from '@angular/router';
+import { AsyncPipe, NgFor, SlicePipe } from '@angular/common';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { RouterModule } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { Product } from '../../models/interfaces';
-import { ProductService } from '../../services/product.service';
 import { CartService } from '../../services/cart.service';
-import { AsyncPipe, NgFor, SlicePipe } from '@angular/common';
+import { ProductService } from '../../services/product.service';
 
 @Component({
   selector: 'app-product-grid',
@@ -20,8 +20,7 @@ export class ProductGridComponent implements OnInit, OnDestroy {
 
   constructor(
     public productService: ProductService,
-    public cartService: CartService,
-    private router: Router
+    public cartService: CartService
   ) {}
 
   ngOnInit(): void {

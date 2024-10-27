@@ -1,0 +1,96 @@
+<div class="fixed right-0 top-0 h-full z-50 flex items-start justify-end">
+    <!-- Cart Icon with Counter -->
+    <button 
+      (click)="toggleCart()" 
+      class="fixed top-4 right-4 bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition-all"
+      [class.mr-80]="isOpen">
+      🛒
+      @if (cartItems.length > 0) {
+        <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-6 h-6 rounded-full flex items-center justify-center">
+          {{getTotalQuantity()}}
+        </span>
+      }
+    </button>
+
+    <!-- Drawer -->
+    <div 
+      class="fixed top-0 right-0 h-full w-80 bg-white shadow-lg transform transition-transform duration-300 ease-in-out z-50"
+      [class.translate-x-full]="!isOpen"
+      [class.translate-x-0]="isOpen">
+      
+      <!-- Cart Header -->
+      <div class="p-4 bg-gray-50 border-b flex justify-between items-center">
+        <h2 class="text-lg font-semibold">Shopping Cart</h2>
+        <button 
+          (click)="toggleCart()"
+          class="text-gray-500 hover:text-gray-700">
+          x
+        </button>
+      </div>
+
+      <!-- Cart Items -->
+      <div class="overflow-y-auto h-[calc(100%-180px)] p-4">
+        @if (cartItems.length === 0) {
+          <div class="text-center text-gray-500 py-8">
+            Your cart is empty
+          </div>
+        }
+        @for (item of cartItems; track item.product.id) {
+          <div class="flex items-center gap-3 py-3 border-b">
+            <img 
+              [src]="item.product.imageUrl" 
+              [alt]="item.product.name"
+              class="w-16 h-16 object-cover rounded">
+            
+            <div class="flex-grow">
+              <h3 class="font-medium">{{item.product.name}}</h3>
+              <p class="text-gray-500">${{item.product.price}}</p>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <button 
+                (click)="decrementQuantity(item)"
+                class="p-1 rounded-full hover:bg-gray-100">
+                -
+              </button>
+              <span class="w-8 text-center">{{item.quantity}}</span>
+              <button 
+                (click)="incrementQuantity(item)"
+                [disabled]="item.quantity >= item.product.stock"
+                class="p-1 rounded-full hover:bg-gray-100 disabled:opacity-50">
+                +
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Cart Footer -->
+      @if (cartItems.length > 0) {
+        <div class="absolute bottom-0 left-0 right-0 p-4 bg-white border-t">
+          <button 
+                  (click)="clearCart()">
+                  🗑️
+                </button>
+          <div class="flex justify-between mb-4">
+            <span class="font-semibold">Total:</span>
+            <span class="font-semibold">${{getTotal() | number:'1.2-2'}}</span>
+          </div>
+          <button 
+            routerLink="/checkout"
+            (click)="toggleCart()"
+            class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition-colors">
+            Checkout
+          </button>
+        </div>
+      }
+    </div>
+
+    <!-- Overlay -->
+    @if (isOpen) {
+      <div 
+        class="fixed inset-0 bg-black bg-opacity-50 z-40"
+        (click)="toggleCart()">
+      </div>
+    }
+  </div>
