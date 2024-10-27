@@ -29,6 +29,11 @@ export class ProductGridComponent implements OnInit, OnDestroy {
         this.products = products;
       })
     );
+    this.subscription.add(
+      this.cartService.getItemRemovedObservable().subscribe(({productId, quantity}) => {
+        this.productService.restockProduct(productId, quantity);
+      })
+    );
   }
 
   ngOnDestroy(): void {

@@ -9,7 +9,7 @@ import { CartItem } from '../../models/interfaces';
 @Component({
   selector: 'app-cart-drawer',
   standalone: true,
-  imports: [CommonModule, RouterLink],  
+  imports: [CommonModule, RouterLink],
   templateUrl: './cart-drawer.component.html',
   styleUrls: ['./cart-drawer.component.css']
 })
@@ -38,15 +38,17 @@ export class CartDrawerComponent implements OnInit, OnDestroy {
 
   incrementQuantity(item: CartItem) {
     if (item.quantity < item.product.stock) {
-      this.cartService.addToCart(item.product);
+      this.cartService.updateQuantity(item.product.id, item.quantity + 1);
     }
   }
 
   decrementQuantity(item: CartItem) {
     if (item.quantity > 1) {
       this.cartService.updateQuantity(item.product.id, item.quantity - 1);
+      this.cartService.emitItemRemoved(item.product.id, 1);
     } else {
       this.cartService.removeFromCart(item.product.id);
+      this.cartService.emitItemRemoved(item.product.id, 1);
     }
   }
 

@@ -1,6 +1,6 @@
 // cart.service.ts
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { CartItem } from '../models/interfaces';
 import { Product } from '../models/interfaces';
 
@@ -10,6 +10,7 @@ import { Product } from '../models/interfaces';
 export class CartService {
   private cartItems: CartItem[] = [];
   private cartSubject = new BehaviorSubject<CartItem[]>([]);
+  private itemRemovedSubject = new Subject<{productId: number, quantity: number}>();
 
   constructor() {}
 
@@ -29,30 +30,40 @@ export class CartService {
     this.cartSubject.next([...this.cartItems]);
   }
 
+  updateQuantity(productId: number, newQuantity: number): void {
+    const item = this.cartItems.find(item => item.product.id === productId);
+    if (item) {
+      if (newQuantity <= 0) {
+        this.removeFromCart(productId);
+      } else {
+        item.quantity = newQuantity;
+        this.cartSubject.next([...this.cartItems]);
+      }
+    }
+  }
+
   removeFromCart(productId: number): void {
     this.cartItems = this.cartItems.filter(item => item.product.id !== productId);
     this.cartSubject.next([...this.cartItems]);
   }
 
-  updateQuantity(productId: number, quantity: number): void {
-    const item = this.cartItems.find(item => item.product.id === productId);
-    if (item) {
-      item.quantity = quantity;
-      this.cartSubject.next([...this.cartItems]);
-    }
+  emitItemRemoved(productId: number, quantity: number): void {
+    this.itemRemovedSubject.next({productId, quantity});
   }
-
   getTotal(): number {
-    return this.cartItems.reduce((total, item) => 
+    return this.cartItems.reduce((total, item) =>
       total + (item.product.price * item.quantity), 0);
   }
 
   getTotalQuantity(): number {
     return this.cartItems.reduce((total, item) => total + item.quantity, 0);
   }
-  
+
   clearCart(): void {
     this.cartItems = [];
-    this.cartSubject.next([]);
+  }
+
+  getItemRemovedObservable(): Observable<{productId: number, quantity: number}> {
+    return this.itemRemovedSubject.asObservable();
   }
 }
