@@ -62,5 +62,6 @@ export class CartDrawerComponent implements OnInit, OnDestroy {
 
   clearCart() {
     this.cartService.clearCart();
+    this.cartItems = [];
   }
 }
