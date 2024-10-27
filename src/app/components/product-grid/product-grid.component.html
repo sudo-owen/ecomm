@@ -9,7 +9,7 @@
       *ngFor="let product of products"
       class="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer hover:shadow-xl hover:bg-gray-50"
     >
-      <div routerLink="/product/{{ product.id }}">
+      <div routerLink="/products/{{ product.id }}">
         <img
           [src]="product.imageUrl"
           [alt]="product.name"
