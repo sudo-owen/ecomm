@@ -8,9 +8,8 @@ describe('ProductGridComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ProductGridComponent]
-    })
-    .compileComponents();
+      imports: [ProductGridComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(ProductGridComponent);
     component = fixture.componentInstance;

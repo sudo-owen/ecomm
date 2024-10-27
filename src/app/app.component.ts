@@ -7,7 +7,12 @@ import { CartDrawerComponent } from './components/cart-drawer/cart-drawer.compon
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, HeaderComponent, FooterComponent, CartDrawerComponent],
+  imports: [
+    RouterOutlet,
+    HeaderComponent,
+    FooterComponent,
+    CartDrawerComponent,
+  ],
   template: `
     <div class="flex flex-col min-h-screen">
       <app-header></app-header>
@@ -17,7 +22,7 @@ import { CartDrawerComponent } from './components/cart-drawer/cart-drawer.compon
       <app-footer></app-footer>
     </div>
     <app-cart-drawer></app-cart-drawer>
-  `
+  `,
 })
 export class AppComponent {
   title = 'ecomm';

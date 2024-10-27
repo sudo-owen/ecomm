@@ -12,7 +12,7 @@ import { ProductService } from '../../services/product.service';
   templateUrl: './product-grid.component.html',
   styleUrls: ['./product-grid.component.css'],
   imports: [AsyncPipe, SlicePipe, NgFor, RouterModule],
-  standalone: true
+  standalone: true,
 })
 export class ProductGridComponent implements OnInit, OnDestroy {
   products: Product[] = [];
@@ -20,19 +20,21 @@ export class ProductGridComponent implements OnInit, OnDestroy {
 
   constructor(
     public productService: ProductService,
-    public cartService: CartService
+    public cartService: CartService,
   ) {}
 
   ngOnInit(): void {
     this.subscription.add(
-      this.productService.getProducts().subscribe(products => {
+      this.productService.getProducts().subscribe((products) => {
         this.products = products;
-      })
+      }),
     );
     this.subscription.add(
-      this.cartService.getItemRemovedObservable().subscribe(({productId, quantity}) => {
-        this.productService.restockProduct(productId, quantity);
-      })
+      this.cartService
+        .getItemRemovedObservable()
+        .subscribe(({ productId, quantity }) => {
+          this.productService.restockProduct(productId, quantity);
+        }),
     );
   }
 

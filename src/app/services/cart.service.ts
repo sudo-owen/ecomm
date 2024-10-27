@@ -5,12 +5,15 @@ import { CartItem } from '../models/interfaces';
 import { Product } from '../models/interfaces';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class CartService {
   private cartItems: CartItem[] = [];
   private cartSubject = new BehaviorSubject<CartItem[]>([]);
-  private itemRemovedSubject = new Subject<{productId: number, quantity: number}>();
+  private itemRemovedSubject = new Subject<{
+    productId: number;
+    quantity: number;
+  }>();
 
   constructor() {}
 
@@ -19,7 +22,9 @@ export class CartService {
   }
 
   addToCart(product: Product): void {
-    const existingItem = this.cartItems.find(item => item.product.id === product.id);
+    const existingItem = this.cartItems.find(
+      (item) => item.product.id === product.id,
+    );
 
     if (existingItem) {
       existingItem.quantity += 1;
@@ -31,7 +36,7 @@ export class CartService {
   }
 
   updateQuantity(productId: number, newQuantity: number): void {
-    const item = this.cartItems.find(item => item.product.id === productId);
+    const item = this.cartItems.find((item) => item.product.id === productId);
     if (item) {
       if (newQuantity <= 0) {
         this.removeFromCart(productId);
@@ -43,16 +48,20 @@ export class CartService {
   }
 
   removeFromCart(productId: number): void {
-    this.cartItems = this.cartItems.filter(item => item.product.id !== productId);
+    this.cartItems = this.cartItems.filter(
+      (item) => item.product.id !== productId,
+    );
     this.cartSubject.next([...this.cartItems]);
   }
 
   emitItemRemoved(productId: number, quantity: number): void {
-    this.itemRemovedSubject.next({productId, quantity});
+    this.itemRemovedSubject.next({ productId, quantity });
   }
   getTotal(): number {
-    return this.cartItems.reduce((total, item) =>
-      total + (item.product.price * item.quantity), 0);
+    return this.cartItems.reduce(
+      (total, item) => total + item.product.price * item.quantity,
+      0,
+    );
   }
 
   getTotalQuantity(): number {
@@ -63,7 +72,10 @@ export class CartService {
     this.cartItems = [];
   }
 
-  getItemRemovedObservable(): Observable<{productId: number, quantity: number}> {
+  getItemRemovedObservable(): Observable<{
+    productId: number;
+    quantity: number;
+  }> {
     return this.itemRemovedSubject.asObservable();
   }
 }

@@ -1,6 +1,8 @@
 <section class="w-full py-12 md:py-24 lg:py-32 xl:py-48">
   <div class="container px-4 md:px-6 mx-auto">
-    <div class="grid gap-6 lg:grid-cols-[1fr_400px] lg:gap-12 xl:grid-cols-[1fr_600px]">
+    <div
+      class="grid gap-6 lg:grid-cols-[1fr_400px] lg:gap-12 xl:grid-cols-[1fr_600px]"
+    >
       <img
         alt="Stylish Apparel"
         class="mx-auto aspect-video overflow-hidden rounded-xl object-cover object-center sm:w-full lg:order-last"
@@ -10,16 +12,21 @@
       />
       <div class="flex flex-col justify-center space-y-4">
         <div class="space-y-2">
-          <h1 class="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none">
+          <h1
+            class="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none"
+          >
             Discover Your Style with Our Trendy Apparel
           </h1>
           <p class="max-w-[600px] text-muted-foreground md:text-xl">
-            Designed for your lifestyle. Crafted for comfort. Elevate your wardrobe with our premium
-            clothing collection.
+            Designed for your lifestyle. Crafted for comfort. Elevate your
+            wardrobe with our premium clothing collection.
           </p>
         </div>
         <div class="flex flex-col gap-2 min-[400px]:flex-row">
-          <button routerLink="/products" class="inline-flex h-10 items-center justify-center rounded-md bg-primary px-8 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50">
+          <button
+            routerLink="/products"
+            class="inline-flex h-10 items-center justify-center rounded-md bg-primary px-8 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+          >
             Shop Now
           </button>
         </div>
@@ -29,38 +36,60 @@
 </section>
 <section class="w-full py-12 md:py-24 lg:py-32 bg-muted">
   <div class="container px-4 md:px-6 mx-auto">
-    <h2 class="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-8">Why Choose Our Apparel?</h2>
+    <h2
+      class="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-8"
+    >
+      Why Choose Our Apparel?
+    </h2>
     <div class="grid gap-6 lg:grid-cols-3">
       <div class="bg-white rounded-lg shadow-md p-6">
         <div class="flex flex-col items-center space-y-2 p-6">
-          <svg class="h-12 w-12 text-primary" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg
+            class="h-12 w-12 text-primary"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
             <!-- Add your QualityIcon SVG path here -->
           </svg>
           <h3 class="text-xl font-bold">Premium Quality</h3>
           <p class="text-muted-foreground text-center">
-            Our clothing is made from high-quality materials, ensuring comfort and durability.
+            Our clothing is made from high-quality materials, ensuring comfort
+            and durability.
           </p>
         </div>
       </div>
       <div class="bg-white rounded-lg shadow-md p-6">
         <div class="flex flex-col items-center space-y-2 p-6">
-          <svg class="h-12 w-12 text-primary" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg
+            class="h-12 w-12 text-primary"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
             <!-- Add your StyleIcon SVG path here -->
           </svg>
           <h3 class="text-xl font-bold">Trendy Designs</h3>
           <p class="text-muted-foreground text-center">
-            Stay fashionable with our latest styles and designs for every occasion.
+            Stay fashionable with our latest styles and designs for every
+            occasion.
           </p>
         </div>
       </div>
       <div class="bg-white rounded-lg shadow-md p-6">
         <div class="flex flex-col items-center space-y-2 p-6">
-          <svg class="h-12 w-12 text-primary" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg
+            class="h-12 w-12 text-primary"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
             <!-- Add your SustainabilityIcon SVG path here -->
           </svg>
           <h3 class="text-xl font-bold">Sustainable Fashion</h3>
           <p class="text-muted-foreground text-center">
-            We're committed to eco-friendly practices and sustainable materials in our production.
+            We're committed to eco-friendly practices and sustainable materials
+            in our production.
           </p>
         </div>
       </div>
@@ -69,22 +98,36 @@
 </section>
 <section class="w-full py-12 md:py-24 lg:py-32">
   <div class="container px-4 md:px-6 mx-auto">
-    <h2 class="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-8">Featured Products</h2>
+    <h2
+      class="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-8"
+    >
+      Featured Products
+    </h2>
     <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-      <div *ngFor="let i of [1, 2, 3]" class="bg-white rounded-lg shadow-md">
+      <div
+        *ngFor="let product of featuredProducts$ | async"
+        class="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer hover:shadow-xl transition-shadow duration-300"
+        [routerLink]="['/products', product.id]"
+      >
         <div class="p-4">
           <img
-            [alt]="'Stylish Apparel ' + i"
+            [alt]="product.name"
             class="aspect-square object-cover w-full rounded-lg"
             height="400"
-            [src]="'assets/images/placeholder.svg'"
+            [src]="product.imageUrl"
             width="400"
           />
-          <h3 class="text-lg font-bold mt-2">Trendy {{i === 1 ? 'T-Shirt' : i === 2 ? 'Jeans' : 'Jacket'}}</h3>
-          <p class="text-sm text-muted-foreground">Comfort meets style in this must-have piece</p>
+          <h3 class="text-lg font-bold mt-2">{{ product.name }}</h3>
+          <p class="text-sm text-muted-foreground">{{ product.description }}</p>
           <div class="flex justify-between items-center mt-2">
-            <span class="text-lg font-bold">${{i === 1 ? '29.99' : i === 2 ? '59.99' : '89.99'}}</span>
-            <button class="bg-primary text-white px-4 py-2 rounded">Add to Cart</button>
+            <span class="text-lg font-bold"
+              >${{ product.price.toFixed(2) }}</span
+            >
+            <button
+              class="bg-primary text-white px-4 py-2 rounded hover:bg-primary/90 transition-colors"
+            >
+              View Details
+            </button>
           </div>
         </div>
       </div>
@@ -93,17 +136,28 @@
 </section>
 <section class="w-full py-12 md:py-24 lg:py-32 bg-muted">
   <div class="container px-4 md:px-6 mx-auto">
-    <h2 class="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-8">What Our Customers Say</h2>
+    <h2
+      class="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-8"
+    >
+      What Our Customers Say
+    </h2>
     <div class="grid gap-6 lg:grid-cols-3">
       <div *ngFor="let i of [1, 2, 3]" class="bg-white rounded-lg shadow-md">
         <div class="p-6">
           <div class="flex space-x-1 mb-2">
-            <svg *ngFor="let star of [1, 2, 3, 4, 5]" class="w-5 h-5 fill-primary text-primary" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <svg
+              *ngFor="let star of [1, 2, 3, 4, 5]"
+              class="w-5 h-5 fill-primary text-primary"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
               <!-- Add your Star SVG path here -->
             </svg>
           </div>
           <p class="text-muted-foreground mb-2">
-            "I love the quality and style of these clothes! They're comfortable, fashionable, and perfect for any occasion. Highly recommended!"
+            "I love the quality and style of these clothes! They're comfortable,
+            fashionable, and perfect for any occasion. Highly recommended!"
           </p>
           <div class="flex items-center space-x-2">
             <img
@@ -112,7 +166,7 @@
               height="40"
               src="assets/images/placeholder.svg"
               width="40"
-              style="aspect-ratio: 40/40; object-fit: cover;"
+              style="aspect-ratio: 40/40; object-fit: cover"
             />
             <div>
               <p class="font-semibold">Alex Johnson</p>
@@ -128,16 +182,27 @@
   <div class="container px-4 md:px-6 mx-auto">
     <div class="flex flex-col items-center space-y-4 text-center">
       <div class="space-y-2">
-        <h2 class="text-3xl font-bold tracking-tighter sm:text-5xl">Ready to Transform Your Wardrobe?</h2>
-        <p class="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-          Join thousands of satisfied customers who have improved their style with our trendy apparel.
+        <h2 class="text-3xl font-bold tracking-tighter sm:text-5xl">
+          Ready to Transform Your Wardrobe?
+        </h2>
+        <p
+          class="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed"
+        >
+          Join thousands of satisfied customers who have improved their style
+          with our trendy apparel.
         </p>
       </div>
       <button
         routerLink="/products"
-        class="inline-flex h-10 items-center justify-center rounded-md bg-primary px-8 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50">
+        class="inline-flex h-10 items-center justify-center rounded-md bg-primary px-8 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+      >
         Shop Now
-        <svg class="ml-2 h-4 w-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg
+          class="ml-2 h-4 w-4"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
           <!-- Add your ChevronRight SVG path here -->
         </svg>
       </button>
