@@ -7,6 +7,7 @@ export interface Product {
   imageUrl: string;
   stock: number;
   category: string;
+  fullDescription: string;
 }
 
 // cart-item.interface.ts
