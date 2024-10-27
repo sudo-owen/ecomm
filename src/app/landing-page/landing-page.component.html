@@ -1,0 +1,147 @@
+<section class="w-full py-12 md:py-24 lg:py-32 xl:py-48">
+  <div class="container px-4 md:px-6">
+    <div class="grid gap-6 lg:grid-cols-[1fr_400px] lg:gap-12 xl:grid-cols-[1fr_600px]">
+      <img
+        alt="Ergonomic Chair"
+        class="mx-auto aspect-video overflow-hidden rounded-xl object-cover object-center sm:w-full lg:order-last"
+        height="550"
+        src="assets/images/placeholder.svg"
+        width="550"
+      />
+      <div class="flex flex-col justify-center space-y-4">
+        <div class="space-y-2">
+          <h1 class="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none">
+            Experience True Comfort with Our Ergonomic Chairs
+          </h1>
+          <p class="max-w-[600px] text-muted-foreground md:text-xl">
+            Designed for your well-being. Engineered for productivity. Elevate your workspace with our premium
+            ergonomic chairs.
+          </p>
+        </div>
+        <div class="flex flex-col gap-2 min-[400px]:flex-row">
+          <button routerLink="/products" class="inline-flex h-10 items-center justify-center rounded-md bg-primary px-8 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50">
+            Shop Now
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="w-full py-12 md:py-24 lg:py-32 bg-muted">
+  <div class="container px-4 md:px-6">
+    <h2 class="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-8">Why Choose Our Chairs?</h2>
+    <div class="grid gap-6 lg:grid-cols-3">
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex flex-col items-center space-y-2 p-6">
+          <svg class="h-12 w-12 text-primary" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Add your ActivityIcon SVG path here -->
+          </svg>
+          <h3 class="text-xl font-bold">Improved Posture</h3>
+          <p class="text-muted-foreground text-center">
+            Our chairs are designed to support your spine's natural curve, promoting better posture.
+          </p>
+        </div>
+      </div>
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex flex-col items-center space-y-2 p-6">
+          <svg class="h-12 w-12 text-primary" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Add your HeartIcon SVG path here -->
+          </svg>
+          <h3 class="text-xl font-bold">Reduced Pain</h3>
+          <p class="text-muted-foreground text-center">
+            Experience less back and neck pain with our ergonomically designed chairs.
+          </p>
+        </div>
+      </div>
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex flex-col items-center space-y-2 p-6">
+          <svg class="h-12 w-12 text-primary" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Add your ZapIcon SVG path here -->
+          </svg>
+          <h3 class="text-xl font-bold">Increased Productivity</h3>
+          <p class="text-muted-foreground text-center">
+            Comfortable seating leads to better focus and increased productivity throughout the day.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="w-full py-12 md:py-24 lg:py-32">
+  <div class="container px-4 md:px-6">
+    <h2 class="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-8">Featured Products</h2>
+    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div *ngFor="let i of [1, 2, 3]" class="bg-white rounded-lg shadow-md">
+        <div class="p-4">
+          <img
+            [alt]="'Ergonomic Chair ' + i"
+            class="aspect-square object-cover w-full rounded-lg"
+            height="400"
+            [src]="'assets/images/placeholder.svg'"
+            width="400"
+          />
+          <h3 class="text-lg font-bold mt-2">Ergo Pro Chair {{i}}</h3>
+          <p class="text-sm text-muted-foreground">The ultimate in comfort and support</p>
+          <div class="flex justify-between items-center mt-2">
+            <span class="text-lg font-bold">$299.99</span>
+            <button class="bg-primary text-white px-4 py-2 rounded">Add to Cart</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="w-full py-12 md:py-24 lg:py-32 bg-muted">
+  <div class="container px-4 md:px-6">
+    <h2 class="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-8">What Our Customers Say</h2>
+    <div class="grid gap-6 lg:grid-cols-3">
+      <div *ngFor="let i of [1, 2, 3]" class="bg-white rounded-lg shadow-md">
+        <div class="p-6">
+          <div class="flex space-x-1 mb-2">
+            <svg *ngFor="let star of [1, 2, 3, 4, 5]" class="w-5 h-5 fill-primary text-primary" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <!-- Add your Star SVG path here -->
+            </svg>
+          </div>
+          <p class="text-muted-foreground mb-2">
+            "This chair has completely transformed my work-from-home experience. My back pain is gone, and I
+            feel more productive than ever!"
+          </p>
+          <div class="flex items-center space-x-2">
+            <img
+              alt="Customer"
+              class="rounded-full"
+              height="40"
+              src="assets/images/placeholder.svg"
+              width="40"
+              style="aspect-ratio: 40/40; object-fit: cover;"
+            />
+            <div>
+              <p class="font-semibold">Jane Doe</p>
+              <p class="text-sm text-muted-foreground">Happy Customer</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="w-full py-12 md:py-24 lg:py-32">
+  <div class="container px-4 md:px-6">
+    <div class="flex flex-col items-center space-y-4 text-center">
+      <div class="space-y-2">
+        <h2 class="text-3xl font-bold tracking-tighter sm:text-5xl">Ready to Transform Your Workspace?</h2>
+        <p class="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+          Join thousands of satisfied customers who have improved their work life with our ergonomic chairs.
+        </p>
+      </div>
+      <button
+        routerLink="/products"
+        class="inline-flex h-10 items-center justify-center rounded-md bg-primary px-8 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50">
+        Shop Now
+        <svg class="ml-2 h-4 w-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Add your ChevronRight SVG path here -->
+        </svg>
+      </button>
+    </div>
+  </div>
+</section>
