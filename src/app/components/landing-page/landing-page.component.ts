@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { NgFor, AsyncPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { ProductService } from '../services/product.service';
-import { Product } from '../models/interfaces';
+import { ProductService } from '../../services/product.service';
+import { Product } from '../../models/interfaces';
 import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 
