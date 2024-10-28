@@ -78,6 +78,47 @@ async function generateProductVariations(productDescription: string): Promise<Pr
     return variations;
   }
 
+async function getProductImageVariations(productDescription: string) {
+  const prompt = "You are tasked with generating two different image generation prompts based on a given product description. These prompts will be used for A/B testing of product images. Your goal is to create prompts that will result in visually distinct and appealing images that accurately represent the product.\n\nHere is the product description:\n<product_description>\n" +
+   productDescription + 
+  "\n</product_description>\n\nTo generate the first prompt:\n1. Focus on the key features of the product mentioned in the description.\n2. Imagine a realistic, straightforward representation of the product.\n3. Include details about the product's color, style, and main characteristics.\n4. Specify a neutral background or setting that complements the product.\n\nTo generate the second prompt:\n1. Take a more creative or artistic approach to presenting the product.\n2. Imagine the product in a specific context or being used in a particular scenario.\n3. Incorporate elements that evoke a mood or lifestyle associated with the product.\n4. Consider using a unique perspective, lighting, or composition to make the image stand out.\n\nFor both prompts:\n- Use clear, descriptive language that an image generation AI can interpret.\n- Avoid mentioning brands or specific people.\n- Keep each prompt between 50-100 words.\n\nPlease provide your output in the following format:\n<prompt1>\n[Insert your first prompt here]\n</prompt1>\n\n<prompt2>\n[Insert your second prompt here]\n</prompt2>";
+  
+  const msg = await anthropic.messages.create({
+    model: "claude-3-5-sonnet-20241022",
+    max_tokens: 1000,
+    temperature: 0,
+    messages: [
+        {
+        "role": "user",
+        "content": [
+            {
+            "type": "text",
+            "text": prompt
+            }
+        ]
+        },
+    ]
+    });
+    const promptRegex = /<prompt(\d)>([\s\S]*?)<\/prompt\1>/g;
+    const prompts = [];
+    let match;
+    if (msg.content[0].type !== 'text') {
+      throw new Error("Failed to extract prompts from the response");
+    }
+    while ((match = promptRegex.exec(msg.content[0].text)) !== null) {
+      prompts.push(match[2].trim());
+    }
+    
+    if (prompts.length !== 2) {
+      throw new Error("Failed to extract exactly two prompts from the response");
+    }
+    
+    return {
+      prompt1: prompts[0],
+      prompt2: prompts[1]
+    };
+
+}
 
 // Mock ProductService
 class MockProductService {
@@ -216,23 +257,32 @@ async function generateProductImage(description: string): Promise<string> {
 async function addImageUrlsToProducts(productService: MockProductService): Promise<Product[]> {
   const products = await productService.getProducts();
   let updatedCount = 0;
-  const updatedProducts: Product[] = [];
+  const updatedProducts = [];
 
   for (let product of products) {
-      console.log(`Generating image for ${product.name}...`);
-      const imageUrl = await generateProductImage(product.fullDescription);
-      console.log(`Generated image URL for ${product.name}: ${imageUrl}`);
-      product.imageUrl = imageUrl;
-      const updatedProduct: Product = { ...product };
-      productService.updateProduct(updatedProduct);
-      updatedProducts.push(updatedProduct);
-      updatedCount++;
+    console.log(`Generating images for ${product.name}...`);
+    const prompts = await getProductImageVariations(product.fullDescription);
+    
+    const imageUrl1 = await generateProductImage(prompts.prompt1);
+    const imageUrl2 = await generateProductImage(prompts.prompt2);
+    
+    console.log(`Generated image URLs for ${product.name}:`);
+    console.log(`  Image 1: ${imageUrl1}`);
+    console.log(`  Image 2: ${imageUrl2}`);
+    
+    const updatedProduct = { 
+      ...product, 
+      imageVariation1: imageUrl1,
+      imageVariation2: imageUrl2
+    };
+    updatedProducts.push(updatedProduct);
+    updatedCount++;
   }
 
-  console.log(`Updated ${updatedCount} products with new image URLs.`);
+  console.log(`Updated ${updatedCount} products with new image URLs and variations.`);
   return updatedProducts;
 }
-async function saveProductsToJson(products: Product[]): Promise<void> {
+async function saveProductsToJson(products: any[]): Promise<void> {
   const outputPath = path.join(__dirname, 'updated_products.json');
   await fs.writeFile(outputPath, JSON.stringify(products, null, 2));
   console.log(`Updated products saved to ${outputPath}`);
