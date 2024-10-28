@@ -1,7 +1,7 @@
 import { Routes } from '@angular/router';
 import { ProductGridComponent } from './components/product-grid/product-grid.component';
 import { ProductDetailComponent } from './components/product-detail/product-detail.component';
-import { LandingPageComponent } from './landing-page/landing-page.component';
+import { LandingPageComponent } from './components/landing-page/landing-page.component';
 import { CheckoutComponent } from './components/checkout/checkout.component';
 
 export const routes: Routes = [
