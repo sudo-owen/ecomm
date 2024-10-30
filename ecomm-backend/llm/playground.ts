@@ -5,9 +5,11 @@ import * as path from 'path';
 import { promises as fs } from 'node:fs';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import axios from 'axios';
+
 // import { ProductService } from '../services/product.service';
 // import { firstValueFrom } from 'rxjs';
-import { Product } from '../models/interfaces';
+import { Product } from '../../src/app/models/interfaces';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -23,7 +25,7 @@ const openai = new OpenAI({
 });
 
 
-type ProductVariations = {
+interface ProductVariations {
     variation1: string;
     variation2: string;
     variation3: string;
@@ -247,10 +249,26 @@ async function generateProductImage(description: string): Promise<string> {
       if (!response.data || response.data.length === 0 || !response.data[0].url) {
         throw new Error("No data in the response");
       }
-      return response.data[0].url;
+      if (!response.data || response.data.length === 0 || !response.data[0].url) {
+        throw new Error("No data in the response");
+      }
+  
+      const imageUrl = response.data[0].url;
+      const imageName = `product_${Date.now()}.png`;
+      const publicPath = path.resolve(__dirname, '..', '..', '..', '..', 'public');
+      const imagePath = path.join(publicPath, imageName);
+  
+      // Download the image
+      const imageResponse = await axios.get(imageUrl, { responseType: 'arraybuffer' });
+      await fs.writeFile(imagePath, imageResponse.data);
+  
+      console.log(`Image saved to: ${imagePath}`);
+  
+      // Return the relative path to be used in your application
+      return `/public/${imageName}`;
     } catch (error) {
-      console.error(`Failed to generate image for ${description}:`, error);
-      return ''; // Return an empty string or a default image URL in case of error
+      console.error(`Failed to generate or save image for ${description}:`, error);
+      return ''; // Return an empty string or a default image path in case of error
     }
   }
 
@@ -259,23 +277,16 @@ async function addImageUrlsToProducts(productService: MockProductService): Promi
   let updatedCount = 0;
   const updatedProducts = [];
 
-  for (let product of products) {
+  for (const product of products) {
     console.log(`Generating images for ${product.name}...`);
     const prompts = await getProductImageVariations(product.fullDescription);
     
     const imageUrl1 = await generateProductImage(prompts.prompt1);
-    const imageUrl2 = await generateProductImage(prompts.prompt2);
     
     console.log(`Generated image URLs for ${product.name}:`);
     console.log(`  Image 1: ${imageUrl1}`);
-    console.log(`  Image 2: ${imageUrl2}`);
-    
-    const updatedProduct = { 
-      ...product, 
-      imageVariation1: imageUrl1,
-      imageVariation2: imageUrl2
-    };
-    updatedProducts.push(updatedProduct);
+    product.imageUrl = imageUrl1;
+    updatedProducts.push(product);
     updatedCount++;
   }
 
