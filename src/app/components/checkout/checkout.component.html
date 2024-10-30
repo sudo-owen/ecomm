@@ -23,16 +23,31 @@
             <p class="text-gray-600">${{ item.product.price }}</p>
           </div>
 
-          <select
-            [value]="item.quantity"
-            #myInput
-            (change)="updateQuantity(item, myInput.value)"
-            class="border rounded-md px-2 py-1"
-          >
-            <option *ngFor="let num of [1, 2, 3, 4, 5]" [value]="num">
-              {{ num }}
-            </option>
-          </select>
+          <div class="flex items-center space-x-2">
+            <button 
+              type="button"
+              (click)="updateQuantity(item, item.quantity - 1)"
+              [disabled]="item.quantity <= 1"
+              class="border rounded-md px-2 py-1 disabled:opacity-50"
+            >
+              -
+            </button>
+          
+            <input
+              type="number"
+              [(ngModel)]="item.quantity"
+              class="border rounded-md px-2 py-1 w-16 text-center"
+            >
+          
+            <button 
+              type="button"
+              (click)="updateQuantity(item, item.quantity + 1)"
+              [disabled]="item.quantity >= 5"
+              class="border rounded-md px-2 py-1 disabled:opacity-50"
+            >
+              +
+            </button>
+          </div>
 
           <button
             (click)="removeItem(item.product.id)"

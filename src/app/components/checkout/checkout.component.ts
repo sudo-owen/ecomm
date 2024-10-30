@@ -3,6 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
+  FormsModule,
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
@@ -15,7 +16,7 @@ import { CommonModule, NgFor } from '@angular/common';
   templateUrl: './checkout.component.html',
   styleUrls: ['./checkout.component.scss'],
   standalone: true,
-  imports: [NgFor, ReactiveFormsModule, CommonModule],
+  imports: [NgFor, ReactiveFormsModule, CommonModule, FormsModule],
 })
 export class CheckoutComponent implements OnInit {
   cartItems: CartItem[] = [];
