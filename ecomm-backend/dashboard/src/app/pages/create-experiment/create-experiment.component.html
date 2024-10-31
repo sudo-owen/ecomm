@@ -8,7 +8,7 @@
       </div>
 
       <div class="p-6 space-y-6">
-        <div class="space-y-2">
+        <!--<div class="space-y-2">
           <label for="prompt" class="block text-lg font-medium"
             >Describe the Experiment</label
           >
@@ -20,7 +20,7 @@
             name="prompt"
             required
           ></textarea>
-        </div>
+        </div>-->
 
         <div class="space-y-2">
           <label for="duration" class="block text-lg font-medium"
@@ -111,7 +111,7 @@
         <label class="block text-lg font-medium">Variants</label>
         <ul class="list-disc pl-5 space-y-1">
           <li *ngFor="let variant of generatedExperiment.variants">
-            {{ variant }}
+            {{ variant.name }}
           </li>
         </ul>
       </div>
