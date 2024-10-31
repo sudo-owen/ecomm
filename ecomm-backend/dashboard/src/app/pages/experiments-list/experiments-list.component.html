@@ -1,0 +1,82 @@
+<div class="max-w-7xl mx-auto p-6 space-y-8">
+  <h2 class="text-4xl font-bold">All Experiments</h2>
+
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+    <div class="p-6 border-b border-gray-200">
+      <h3 class="text-2xl font-semibold">Experiments List</h3>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-4 text-left text-sm font-medium text-gray-500">
+              Name
+            </th>
+            <th class="px-6 py-4 text-left text-sm font-medium text-gray-500">
+              Status
+            </th>
+            <th class="px-6 py-4 text-left text-sm font-medium text-gray-500">
+              Start Date
+            </th>
+            <th class="px-6 py-4 text-left text-sm font-medium text-gray-500">
+              End Date
+            </th>
+            <th class="px-6 py-4 text-left text-sm font-medium text-gray-500">
+              Conversions
+            </th>
+            <th class="px-6 py-4 text-left text-sm font-medium text-gray-500">
+              Impressions
+            </th>
+            <th class="px-6 py-4 text-left text-sm font-medium text-gray-500">
+              Conversion Rate
+            </th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+          <tr
+            *ngFor="let experiment of allExperiments"
+            [routerLink]="['/experiment', experiment.id]"
+            class="cursor-pointer transition-colors duration-200 hover:bg-gray-50 active:bg-gray-100"
+          >
+            <td class="px-6 py-4 whitespace-nowrap font-medium">
+              {{ experiment.name }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span
+                [ngClass]="{
+                  'px-2 py-1 rounded-full text-xs font-medium': true,
+                  'bg-green-100 text-green-800': experiment.status === 'Active',
+                  'bg-gray-100 text-gray-800':
+                    experiment.status === 'Completed',
+                }"
+              >
+                {{ experiment.status }}
+              </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-gray-600">
+              {{ experiment.startDate }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-gray-600">
+              {{ experiment.endDate }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap font-medium">
+              {{ experiment.conversions }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-gray-600">
+              {{ experiment.impressions }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap font-medium">
+              {{
+                getConversionRate(
+                  experiment.conversions,
+                  experiment.impressions
+                )
+              }}%
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
