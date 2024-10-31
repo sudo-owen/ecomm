@@ -6,30 +6,68 @@ import { RouterLink } from '@angular/router';
   standalone: true,
   imports: [RouterLink],
   template: `
-    <header class="px-4 lg:px-6 h-14 flex items-center align-left space-x-4">
+    <header class="px-4 lg:px-6 h-14 flex items-center justify-between align-left space-x-4">
       <a class="flex items-center justify-center" routerLink="/">
         <svg
-          class="h-8 w-8"
-          fill="#000000"
-          version="1.1"
-          id="Capa_1"
-          xmlns="http://www.w3.org/2000/svg"
-          xmlns:xlink="http://www.w3.org/1999/xlink"
           viewBox="0 0 60 60"
-          xml:space="preserve"
+          width="32"
+          height="32"
+          xmlns="http://www.w3.org/2000/svg"
         >
+          <defs>
+            <linearGradient
+              id="premium-base"
+              x1="0%"
+              y1="0%"
+              x2="100%"
+              y2="100%"
+            >
+              <stop offset="0%" style="stop-color:#475569;stop-opacity:1" />
+              <stop offset="100%" style="stop-color:#334155;stop-opacity:1" />
+            </linearGradient>
+            <linearGradient
+              id="premium-accent"
+              x1="0%"
+              y1="0%"
+              x2="100%"
+              y2="0%"
+            >
+              <stop offset="0%" style="stop-color:#EAB308;stop-opacity:1" />
+              <stop offset="100%" style="stop-color:#FDE047;stop-opacity:1" />
+            </linearGradient>
+          </defs>
+
+          <circle cx="30" cy="30" r="28" fill="url(#premium-base)" />
+
+          <!-- Outer golden ratio circle -->
           <path
-            d="M59,41H42c-6.065,0-11-4.935-11-11s4.935-11,11-11h14.586l-6.293,6.293c-0.391,0.391-0.391,1.023,0,1.414
-          C50.488,26.902,50.744,27,51,27s0.512-0.098,0.707-0.293l7.999-7.999c0.093-0.092,0.166-0.203,0.217-0.326
-          c0.101-0.244,0.101-0.519,0-0.764c-0.051-0.123-0.125-0.234-0.217-0.326l-7.999-7.999c-0.391-0.391-1.023-0.391-1.414,0
-          s-0.391,1.023,0,1.414L56.586,17H42c-5.4,0-10.039,3.311-12,8.008C28.039,20.311,23.4,17,18,17H1c-0.553,0-1,0.447-1,1s0.447,1,1,1
-          h17c6.065,0,11,4.935,11,11s-4.935,11-11,11H3.414l6.293-6.293c0.391-0.391,0.391-1.023,0-1.414s-1.023-0.391-1.414,0l-7.999,7.999
-          c-0.093,0.092-0.166,0.203-0.217,0.326c-0.101,0.244-0.101,0.52,0,0.764c0.051,0.123,0.124,0.234,0.217,0.326l7.999,7.999
-          C8.488,50.902,8.744,51,9,51s0.512-0.098,0.707-0.293c0.391-0.391,0.391-1.023,0-1.414L3.414,43H18c5.4,0,10.039-3.311,12-8.008
-          C31.961,39.689,36.6,43,42,43h17c0.553,0,1-0.447,1-1S59.553,41,59,41z"
+            d="M30 15
+           A15 15 0 0 1 45 30
+           A15 15 0 0 1 30 45
+           A15 15 0 0 1 15 30
+           A15 15 0 0 1 30 15Z"
+            fill="none"
+            stroke="url(#premium-accent)"
+            stroke-width="1.5"
           />
+
+          <!-- Inner golden circle -->
+          <path
+            d="M30 20
+           A10 10 0 0 1 40 30
+           A10 10 0 0 1 30 40
+           A10 10 0 0 1 20 30
+           A10 10 0 0 1 30 20Z"
+            fill="url(#premium-accent)"
+            opacity="0.9"
+          />
+
+          <!-- Center dot -->
+          <circle cx="30" cy="30" r="3" fill="url(#premium-base)" />
         </svg>
-        <span class="sr-only">Ergo Chairs Co.</span>
+        <div class="font-bold text-xl letters-tight">
+          Center
+        </div>
       </a>
       <nav class="flex gap-4 sm:gap-6">
         <a
@@ -37,6 +75,9 @@ import { RouterLink } from '@angular/router';
           routerLink="/products"
           >Products</a
         >
+      </nav>
+      <nav>
+        <!-- spacer -->
       </nav>
     </header>
   `,

@@ -7,7 +7,7 @@
         alt="Stylish Apparel"
         class="mx-auto aspect-video overflow-hidden rounded-xl object-cover object-center sm:w-full lg:order-last"
         height="550"
-        src="/public/product_1730328250260.png"
+        src="/public/img/product_1730328250260.png"
         width="550"
       />
       <div class="flex flex-col justify-center space-y-4">
@@ -61,7 +61,7 @@
             alt="Quality Apparel"
             class="aspect-square object-cover w-full rounded-lg"
             height="400"
-            src="/public/product_1730328265039.png"
+            src="/public/img/product_1730328265039.png"
             width="400"
           />
         </div>
@@ -85,7 +85,7 @@
             alt="Trendy Apparel"
             class="aspect-square object-cover w-full rounded-lg"
             height="400"
-            src="/public/product_1730328278080.png"
+            src="/public/img/product_1730328278080.png"
             width="400"
           />
         </div>
@@ -109,7 +109,7 @@
             alt="Sustainable Apparel"
             class="aspect-square object-cover w-full rounded-lg"
             height="400"
-            src="/public/product_1730328291610.png"
+            src="/public/img/product_1730328291610.png"
             width="400"
           />
         </div>
@@ -163,7 +163,8 @@
       What Our Customers Say
     </h2>
     <div class="grid gap-6 lg:grid-cols-3">
-      <div *ngFor="let i of [1, 2, 3]" class="bg-white rounded-lg shadow-md">
+      <!-- First Review -->
+      <div class="bg-white rounded-lg shadow-md">
         <div class="p-6">
           <div class="flex space-x-1 mb-2">
             <svg
@@ -173,7 +174,13 @@
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
             >
-              <!-- Add your Star SVG path here -->
+              <path
+                d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
             </svg>
           </div>
           <p class="text-muted-foreground mb-2">
@@ -184,6 +191,86 @@
             <div>
               <p class="font-semibold">Alex Johnson</p>
               <p class="text-sm text-muted-foreground">Satisfied Customer</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Second Review -->
+      <div class="bg-white rounded-lg shadow-md">
+        <div class="p-6">
+          <div class="flex space-x-1 mb-2">
+            <svg
+              *ngFor="let star of [1, 2, 3, 4]"
+              class="w-5 h-5 fill-primary text-primary"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+            <svg
+              class="w-5 h-5 fill-gray-200 text-gray-200"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </div>
+          <p class="text-muted-foreground mb-2">
+            "The attention to detail in these pieces is remarkable. The fabrics
+            are premium and the fit is excellent. Want more color options!"
+          </p>
+          <div class="flex items-center space-x-2">
+            <div>
+              <p class="font-semibold">Sarah Martinez</p>
+              <p class="text-sm text-muted-foreground">Fashion Enthusiast</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Third Review -->
+      <div class="bg-white rounded-lg shadow-md">
+        <div class="p-6">
+          <div class="flex space-x-1 mb-2">
+            <svg
+              *ngFor="let star of [1, 2, 3, 4, 5]"
+              class="w-5 h-5 fill-primary text-primary"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </div>
+          <p class="text-muted-foreground mb-2">
+            "Outstanding customer service and the clothes exceeded my
+            expectations. The sustainable packaging was a nice touch too!"
+          </p>
+          <div class="flex items-center space-x-2">
+            <div>
+              <p class="font-semibold">Michael Chen</p>
+              <p class="text-sm text-muted-foreground">Verified Buyer</p>
             </div>
           </div>
         </div>
@@ -216,7 +303,13 @@
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
         >
-          <!-- Add your ChevronRight SVG path here -->
+          <path
+            d="M9 18L15 12L9 6"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
         </svg>
       </button>
     </div>
