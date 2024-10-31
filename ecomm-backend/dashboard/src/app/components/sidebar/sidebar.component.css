@@ -1,0 +1,4 @@
+.sidebar-container {
+  @apply fixed top-0 left-0 h-full bg-white border-r border-gray-200 shadow-sm z-50;
+  width: 256px;
+}

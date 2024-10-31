@@ -1,0 +1,90 @@
+<div class="max-w-7xl mx-auto p-6 space-y-8">
+  <h2 class="text-4xl font-bold">Overview</h2>
+
+  <!-- Overall Metrics -->
+  <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+    <a
+      routerLink="/experiments"
+      class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 cursor-pointer transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:shadow-sm"
+    >
+      <h3 class="text-sm font-medium text-gray-500">Total Experiments</h3>
+      <div class="text-3xl font-bold mt-2">
+        {{ overallMetrics.totalExperiments }}
+      </div>
+    </a>
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <h3 class="text-sm font-medium text-gray-500">Active Experiments</h3>
+      <div class="text-3xl font-bold mt-2">
+        {{ overallMetrics.activeExperiments }}
+      </div>
+    </div>
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <h3 class="text-sm font-medium text-gray-500">Total Conversions</h3>
+      <div class="text-3xl font-bold mt-2">
+        {{ overallMetrics.totalConversions | number }}
+      </div>
+    </div>
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <h3 class="text-sm font-medium text-gray-500">Overall Conversion Rate</h3>
+      <div class="text-3xl font-bold mt-2">
+        {{ overallMetrics.overallConversionRate }}%
+      </div>
+    </div>
+  </div>
+
+  <!-- Active Experiments -->
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+    <div class="p-6 border-b border-gray-200">
+      <h3 class="text-2xl font-semibold">Active Experiments</h3>
+    </div>
+
+    <div class="p-6 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <a
+        *ngFor="let experiment of activeExperiments"
+        [routerLink]="['/experiment', experiment.id]"
+        class="border border-gray-200 rounded-lg p-6 space-y-4 cursor-pointer transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:shadow-sm"
+      >
+        <div class="flex justify-between items-start">
+          <h4 class="text-lg font-semibold">{{ experiment.name }}</h4>
+        </div>
+
+        <div class="space-y-4">
+          <div class="space-y-2">
+            <div class="flex justify-between text-sm">
+              <span class="text-gray-600">Progress</span>
+              <span class="font-medium">{{ experiment.progress }}%</span>
+            </div>
+            <div class="w-full bg-gray-100 rounded-full h-2.5">
+              <div
+                class="bg-black h-2.5 rounded-full"
+                [style.width]="experiment.progress + '%'"
+              ></div>
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            <div class="flex justify-between text-sm">
+              <span class="text-gray-600">Conversions</span>
+              <span class="font-medium">{{ experiment.conversions }}</span>
+            </div>
+            <div class="flex justify-between text-sm">
+              <span class="text-gray-600">Impressions</span>
+              <span class="font-medium">{{ experiment.impressions }}</span>
+            </div>
+            <div class="flex justify-between text-sm">
+              <span class="text-gray-600">Conversion Rate</span>
+              <span class="font-medium"
+                >{{
+                  getConversionRate(
+                    experiment.conversions,
+                    experiment.impressions
+                  )
+                }}%</span
+              >
+            </div>
+          </div>
+        </div>
+      </a>
+    </div>
+  </div>
+</div>

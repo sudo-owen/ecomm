@@ -1,0 +1,155 @@
+<div class="max-w-4xl mx-auto p-6 space-y-8">
+  <h2 class="text-4xl font-bold">Create New Experiment (Advanced)</h2>
+
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+    <form (ngSubmit)="handleSubmit()">
+      <div class="p-6">
+        <h3 class="text-2xl font-semibold">Experiment Details</h3>
+      </div>
+
+      <div class="p-6 space-y-6">
+        <div class="space-y-2">
+          <label for="prompt" class="block text-lg font-medium"
+            >Describe the Experiment</label
+          >
+          <textarea
+            id="prompt"
+            class="w-full rounded-lg border border-gray-300 p-3 min-h-[120px] focus:ring-2 focus:ring-black focus:border-black"
+            placeholder="Describe the experiment you want to create..."
+            [(ngModel)]="prompt"
+            name="prompt"
+            required
+          ></textarea>
+        </div>
+
+        <div class="space-y-2">
+          <label for="duration" class="block text-lg font-medium"
+            >Test Duration (days)</label
+          >
+          <input
+            id="duration"
+            type="number"
+            class="w-full rounded-lg border border-gray-300 p-3 focus:ring-2 focus:ring-black focus:border-black"
+            [(ngModel)]="experimentParams.duration"
+            name="duration"
+            required
+          />
+        </div>
+
+        <div class="space-y-2">
+          <label for="targetAudience" class="block text-lg font-medium"
+            >Target Audience</label
+          >
+          <select
+            class="w-full rounded-lg border border-gray-300 p-3 bg-white focus:ring-2 focus:ring-black focus:border-black"
+            [(ngModel)]="experimentParams.targetAudience"
+            name="targetAudience"
+          >
+            <option value="all">All Users</option>
+            <option value="new">New Users</option>
+            <option value="returning">Returning Users</option>
+          </select>
+        </div>
+
+        <div class="space-y-2">
+          <label for="trafficAllocation" class="block text-lg font-medium"
+            >Traffic Allocation (%)</label
+          >
+          <input
+            id="trafficAllocation"
+            type="number"
+            class="w-full rounded-lg border border-gray-300 p-3 focus:ring-2 focus:ring-black focus:border-black"
+            min="1"
+            max="100"
+            [(ngModel)]="experimentParams.trafficAllocation"
+            name="trafficAllocation"
+            required
+          />
+        </div>
+      </div>
+
+      <div class="p-6 border-t border-gray-200">
+        <button
+          type="submit"
+          class="px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
+          [disabled]="isLoading"
+        >
+          {{ isLoading ? "Generating..." : "Generate Experiment" }}
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div
+    *ngIf="generatedExperiment"
+    class="bg-white rounded-lg shadow-sm border border-gray-200"
+  >
+    <div class="p-6 border-b border-gray-200">
+      <h3 class="text-2xl font-semibold">Generated Experiment</h3>
+    </div>
+
+    <div class="p-6 space-y-6">
+      <div class="space-y-2">
+        <label class="block text-lg font-medium">Name</label>
+        <input
+          [value]="generatedExperiment.name"
+          class="w-full rounded-lg border border-gray-300 p-3 bg-gray-50"
+          readonly
+        />
+      </div>
+
+      <div class="space-y-2">
+        <label class="block text-lg font-medium">Description</label>
+        <textarea
+          [value]="generatedExperiment.description"
+          class="w-full rounded-lg border border-gray-300 p-3 min-h-[120px] bg-gray-50"
+          readonly
+        ></textarea>
+      </div>
+
+      <div class="space-y-2">
+        <label class="block text-lg font-medium">Variants</label>
+        <ul class="list-disc pl-5 space-y-1">
+          <li *ngFor="let variant of generatedExperiment.variants">
+            {{ variant }}
+          </li>
+        </ul>
+      </div>
+
+      <div class="space-y-2">
+        <label class="block text-lg font-medium">Test Duration</label>
+        <input
+          [value]="experimentParams.duration + ' days'"
+          class="w-full rounded-lg border border-gray-300 p-3 bg-gray-50"
+          readonly
+        />
+      </div>
+
+      <div class="space-y-2">
+        <label class="block text-lg font-medium">Target Audience</label>
+        <input
+          [value]="experimentParams.targetAudience"
+          class="w-full rounded-lg border border-gray-300 p-3 bg-gray-50"
+          readonly
+        />
+      </div>
+
+      <div class="space-y-2">
+        <label class="block text-lg font-medium">Traffic Allocation</label>
+        <input
+          [value]="experimentParams.trafficAllocation + '%'"
+          class="w-full rounded-lg border border-gray-300 p-3 bg-gray-50"
+          readonly
+        />
+      </div>
+    </div>
+
+    <div class="p-6 border-t border-gray-200">
+      <button
+        class="px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
+      >
+        Save Experiment
+      </button>
+    </div>
+  </div>
+</div>

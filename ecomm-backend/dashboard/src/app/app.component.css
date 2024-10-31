@@ -1,0 +1,12 @@
+main {
+  min-height: 100vh;
+  background-color: #f9fafb;
+}
+
+.sidebar-expanded {
+  margin-left: 256px;
+}
+
+.sidebar-collapsed {
+  margin-left: 72px;
+}
