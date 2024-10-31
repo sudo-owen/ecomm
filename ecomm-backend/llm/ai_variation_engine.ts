@@ -16,15 +16,7 @@ const openai = new OpenAI({
 });
 
 
-interface ProductVariations {
-    variation1: string;
-    variation2: string;
-    variation3: string;
-    variation4: string;
-    variation5: string;
-};
-
-async function generateProductVariations(productDescription: string): Promise<ProductVariations> {
+async function generateProductVariations(productDescription: string): Promise<string[]> {
     const prompt = "You are an expert copywriter specializing in crafting compelling product descriptions for e-commerce platforms. Your task is to create five variations of a given product description for A/B testing purposes. These variations will help determine which description is most effective in converting potential customers.\n\nHere is the original product description:\n\n<product_description>\n"
     + productDescription +
     "\n</product_description>\n\nYour goal is to create five variations of this description:\n1. Three slight modifications of the original\n2. One significant departure that explores a new direction\n3. One completely unique variation that takes a fresh perspective on the product\n\nBefore writing the variations, please brainstorm and plan your approach within <brainstorm> tags. In your brainstorming:\n\n1. Identify the target audience and key selling points of the product.\n2. List the key features and benefits of the product.\n3. Consider the emotional appeal and unique value proposition for each variation.\n4. Explore different ways to present these features (e.g., order, emphasis, phrasing).\n5. For slight variations, note specific changes you'll make to the original.\n6. For the significant variation, explore at least three different angles or approaches before choosing one.\n7. For the completely unique variation, think of an innovative way to present the product that hasn't been used in the other variations.\n\nGuidelines for creating the variations:\n\nFor the three slight variations:\n- Maintain the core message and key features of the product\n- Alter the wording, sentence structure, or emphasis\n- You may add or remove minor details, but keep the overall length similar\n- Ensure each variation is distinct from the others\n\nFor the fourth, significant variation:\n- Take a bold new approach to describing the product\n- This could involve:\n  * Focusing on a different key benefit\n  * Using a new tone or style\n  * Reimagining the product's positioning\n  * Addressing a different target audience\n  * Emphasizing emotional appeal over technical specifications\n  * Using a creative narrative or storytelling approach\n- While this should be a departure from the original, it must still accurately represent the product\n\nFor the fifth, completely unique variation:\n- Think outside the box and create a description that stands out from all the others\n- This could involve:\n  * Using an unexpected format (e.g., a mini-story, a dialogue, or a poem)\n  * Adopting a unique persona or voice\n  * Focusing on an unconventional aspect of the product\n  * Creating a vivid scenario that showcases the product's benefits\n- Ensure that this variation is still informative and relevant to potential customers\n\nAfter generating the variations, provide your output in the following JSON format:\n\n{\n  \"variation1\": \"Text of first slight variation\",\n  \"variation2\": \"Text of second slight variation\",\n  \"variation3\": \"Text of third slight variation\",\n  \"variation4\": \"Text of significant variation\",\n  \"variation5\": \"Text of completely unique variation\"\n}\n\nRemember to keep each variation concise and impactful, focusing on the most compelling aspects of the product. Your goal is to create descriptions that will resonate with potential customers and encourage them to make a purchase.";
@@ -67,11 +59,11 @@ async function generateProductVariations(productDescription: string): Promise<Pr
     }
   
     // Parse the JSON string
-    const variations: ProductVariations = JSON.parse(jsonString);
+    const variations: string[] = Object.values(JSON.parse(jsonString));
     return variations;
   }
 
-async function getProductImageVariations(productDescription: string) {
+async function getProductImageVariations(productDescription: string): Promise<string[]> {
   const prompt = "You are tasked with generating two different image generation prompts based on a given product description. These prompts will be used for A/B testing of product images. Your goal is to create prompts that will result in visually distinct and appealing images that accurately represent the product.\n\nHere is the product description:\n<product_description>\n" +
    productDescription + 
   "\n</product_description>\n\nTo generate the first prompt:\n1. Focus on the key features of the product mentioned in the description.\n2. Imagine a realistic, straightforward representation of the product.\n3. Include details about the product's color, style, and main characteristics.\n4. Specify a neutral background or setting that complements the product.\n\nTo generate the second prompt:\n1. Take a more creative or artistic approach to presenting the product.\n2. Imagine the product in a specific context or being used in a particular scenario.\n3. Incorporate elements that evoke a mood or lifestyle associated with the product.\n4. Consider using a unique perspective, lighting, or composition to make the image stand out.\n\nFor both prompts:\n- Use clear, descriptive language that an image generation AI can interpret.\n- Avoid mentioning brands or specific people.\n- Keep each prompt between 50-100 words.\n\nPlease provide your output in the following format:\n<prompt1>\n[Insert your first prompt here]\n</prompt1>\n\n<prompt2>\n[Insert your second prompt here]\n</prompt2>";
@@ -106,10 +98,7 @@ async function getProductImageVariations(productDescription: string) {
       throw new Error("Failed to extract exactly two prompts from the response");
     }
     
-    return {
-      prompt1: prompts[0],
-      prompt2: prompts[1]
-    };
+    return prompts;
 }
 
 async function generateProductImage(description: string, saveFolder: string): Promise<string> {

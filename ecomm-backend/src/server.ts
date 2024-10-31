@@ -21,11 +21,23 @@ interface Product {
   stock: number;
   category: string;
   fullDescription: string;
-  variations: {
-    descriptions: string[];
-    imageUrls: string[];
-  };
 }
+
+interface ProductVariant {
+  id: number;
+  productId: number;
+  changes: Record<string, string>;
+}
+
+interface ABTest {
+  id: number,
+  product: Product,
+  name: string,
+  description: string,
+  variantIds: number[]
+  result: ABTestResult 
+}
+
 
 interface ABTestResult {
   productId: number;
@@ -37,56 +49,84 @@ app.use(cors());
 app.use(express.json());
 app.use('/public', express.static(join(__dirname, 'public')));
 
+const PRODUCT_FILE = join(__dirname, 'public', 'data', 'products.json');
+const PRODUCT_VARIANTS_FILE = join(__dirname, 'public', 'data', 'product_variants.json');
+const IMAGES_FOLDER = join(__dirname, 'public', 'img');
+
 let products: Product[] = [];
 const abTestResults: ABTestResult[] = [];
 
+let productVariantMetadata = {
+  id: 0
+};
+let productVariants: ProductVariant[] = [];
+
+
 async function loadProducts() {
-  const productsPath = join(__dirname, 'public', 'data', 'products_with_variations.json');
-  const productsData = await readFile(productsPath, 'utf-8');
+  const productsData = await readFile(PRODUCT_FILE, 'utf-8');
   products = JSON.parse(productsData);
 }
+
+async function loadProductVariants() {
+  const productsVariantData = await readFile(PRODUCT_VARIANTS_FILE, 'utf-8')
+  const parsedData = JSON.parse(productsVariantData);
+  productVariantMetadata = parsedData.metadata;
+  productVariants = parsedData.data;
+}
+
+async function saveProductVariants() {
+  await writeFile(PRODUCT_VARIANTS_FILE, JSON.stringify(productVariants, null, 2));
+}
+
+async function saveProducts() {
+  await writeFile(
+    PRODUCT_FILE,
+    JSON.stringify(products, null, 2)
+  );
+}
+
 
 async function saveABTestResults() {
   const resultsPath = join(__dirname, 'public', 'data', 'ab_test_results.json');
   await writeFile(resultsPath, JSON.stringify(abTestResults, null, 2));
 }
 
+
 // Add the new endpoint for generating variations
-app.get('/api/generate-variations/:productId', async (req: Request, res: Response) => {
+app.get('/api/generate-variant/:productId', async (req: Request, res: Response) => {
   try {
     const productId = parseInt(req.params.productId);
     const product = products.find(p => p.id === productId);
+
     if (!product) {
       return res.status(404).json({ message: 'Product not found' });
     }
 
-    const descriptionVariations = await generateProductVariations(product.fullDescription);
-    const imageVariations = await getProductImageVariations(product.fullDescription);
+    const descriptionVariant = await generateProductVariations(product.fullDescription);
+    const imageVariant = await getProductImageVariations(product.fullDescription);
 
-    product.variations = {
-      descriptions: [
-        descriptionVariations.variation1,
-        descriptionVariations.variation2,
-        descriptionVariations.variation3,
-        descriptionVariations.variation4,
-        descriptionVariations.variation5
-      ],
-      imageUrls: [
-        await generateProductImage(imageVariations.prompt, join(__dirname, 'public', 'img')),
-        await generateProductImage(imageVariations.prompt2, join(__dirname, 'public', 'img'))
-      ]
-    };
+    descriptionVariant.forEach((fullDescription: string) => {
+      let newVariant: ProductVariant = {
+        id: productVariantMetadata.id++,
+        productId: product.id,
+        changes: {
+          fullDescription: fullDescription
+        }
+      }
+      productVariants.push(newVariant);
+    });
+
+    imageVariant.forEach(async (imagePrompt: string) => {
+      generateProductImage(imagePrompt, IMAGES_FOLDER);
+    });
 
     // Save the updated products
-    await writeFile(
-      join(__dirname, 'public', 'data', 'products_with_variations.json'),
-      JSON.stringify(products, null, 2)
-    );
+    saveProductVariants();
 
-    res.json({ message: 'Variations generated successfully', product });
+    res.json({ message: 'Variants generated successfully'});
   } catch (error) {
-    console.error('Error generating variations:', error);
-    res.status(500).json({ message: 'Error generating variations' });
+    console.error('Error generating variants:', error);
+    res.status(500).json({ message: 'Error generating variants' });
   }
 });
 
@@ -103,8 +143,31 @@ app.get('/api/products/:id', (req: { params: { id: string; }; }, res: { json: (a
   }
 });
 
-app.post('/api/ab-test-result', (req: { body: { productId: any; variationType: any; variationIndex: any; }; }, res: { json: (arg0: { message: string; }) => void; }) => {
+app.post('/api/start-ab-test', (req: Request, res: Response) => {
+  const { productId, name, description } = req.body;
+
+  if (!productId || !name || !description) {
+    return res.status(400).json({ message: 'Missing required fields' });
+  }
+
+  let product = products.find(p => p.id === productId);
+
+  if (!product) {
+    return res.status(404).json({ message: 'Product not found' });
+  }
+
+  const newABTest: ABTest = {
+    id: 0,
+    product: {...product},
+    name: name,
+    description: description,
+    variantIds: [];
+  }
+});
+
+app.post('/api/ab-test-result', (req: Request, res: Response) => {
   const { productId, variationType, variationIndex } = req.body;
+
   let result = abTestResults.find(r => 
     r.productId === productId && 
     r.variationType === variationType && 
@@ -127,6 +190,7 @@ app.get('/api/ab-test-results', (req: any, res: { json: (arg0: ABTestResult[]) =
 
 async function startServer() {
   await loadProducts();
+  await loadProductVariants();
   app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
   });
