@@ -15,3 +15,16 @@ export interface CartItem {
   product: Product;
   quantity: number;
 }
+
+export interface Feature {
+  title: string;
+  description: string;
+  imageSrc: string;
+}
+
+export interface Testimonial {
+  author: string;
+  title: string;
+  quote: string;
+  stars: number[];
+}
