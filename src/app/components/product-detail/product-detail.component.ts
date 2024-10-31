@@ -7,6 +7,7 @@ import { ProductService } from '../../services/product.service';
 import { CartService } from '../../services/cart.service';
 import { FormsModule } from '@angular/forms';
 import { NgFor, NgIf } from '@angular/common';
+import { ABTestService } from '../../services/ab-test.service';
 
 @Component({
   selector: 'app-product-detail',
@@ -17,14 +18,18 @@ import { NgFor, NgIf } from '@angular/common';
 })
 export class ProductDetailComponent implements OnInit, OnDestroy {
   product!: Product;
-  quantity: number = 1;
+  quantity = 1;
+  description!: string;
+  imageUrl!: string;
   private subscription: Subscription = new Subscription();
+
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private productService: ProductService,
     private cartService: CartService,
+    private abTestService: ABTestService
   ) {}
 
   ngOnInit(): void {
@@ -56,11 +61,21 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
         if (product) {
           this.product = product;
           this.quantity = 1; // Reset quantity when loading new product
+          this.loadVariations();
         } else {
           this.router.navigate(['/not-found']);
         }
       }),
     );
+  }
+
+  loadVariations() {
+    this.abTestService.getVariation(this.product, 'descriptions').subscribe(description => {
+      this.description = description;
+    });
+    this.abTestService.getVariation(this.product, 'imageUrls').subscribe(imageUrl => {
+      this.imageUrl = imageUrl;
+    });
   }
 
   addToCart(): void {
@@ -69,6 +84,10 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
         this.cartService.addToCart(this.product);
       }
       this.productService.updateStock(this.product.id, this.quantity);
+      
+      // Record A/B test results
+      this.abTestService.recordResult(this.product, 'descriptions', this.description);
+      this.abTestService.recordResult(this.product, 'imageUrls', this.imageUrl);
     }
   }
 

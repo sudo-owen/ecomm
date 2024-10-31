@@ -1,0 +1,115 @@
+[
+  {
+    "id": 1,
+    "name": "Cotton T-Shirt",
+    "price": 19.99,
+    "description": "Basic cotton t-shirt. Short sleeves. Crew neck.",
+    "fullDescription": "Plain cotton t-shirt with short sleeves and a crew neck. No special features. Comes in one color. Minimal stretch. Requires ironing after wash.",
+    "imageUrl": "/public/img/product_1730266364159.png",
+    "stock": 50,
+    "category": "Clothing",
+    "variations": {
+      "descriptions": [
+        "Classic cotton t-shirt featuring a timeless crew neck design and short sleeves. Simple, traditional fit with minimal stretch for lasting shape. Care instructions: iron after washing for a crisp look.",
+        "Essential crew neck t-shirt crafted from pure cotton. Features short sleeves and a classic fit. Maintains its shape with minimal stretch fabric. Simple care: wash and iron to maintain pristine appearance.",
+        "Versatile cotton crew neck t-shirt with short sleeves and traditional fit. Basic design perfect for everyday wear. Minimal stretch ensures consistent shape. Note: requires ironing after washing for best results.",
+        "Embrace the art of minimalism with our essential cotton t-shirt. In a world of excess, this thoughtfully designed piece strips away the unnecessary, leaving you with pure, uncomplicated style. Its classic crew neck and short sleeves represent the cornerstone of mindful dressing – where less truly becomes more.",
+        "Meet your wardrobe's blank canvas. This pure cotton t-shirt isn't just a piece of clothing – it's an invitation to express yourself. Whether paired with vintage jeans or tucked into a silk skirt, it's ready to tell your style story. Yes, it needs a quick iron after washing, but consider it your moment of mindful garment care. One color, endless possibilities."
+      ],
+      "imageUrls": [
+        "/public/product_1730335028795.png",
+        "/public/product_1730335041545.png"
+      ]
+    }
+  },
+  {
+    "id": 2,
+    "name": "Denim Jeans",
+    "price": 49.99,
+    "description": "Standard fit jeans. Five pockets. Belt loops.",
+    "fullDescription": "Basic denim jeans with a standard fit. Has five pockets and belt loops. No stretch. Prone to fading after multiple washes. May feel stiff initially.",
+    "imageUrl": "/public/img/product_1730266384124.png",
+    "stock": 30,
+    "category": "Clothing"
+  },
+  {
+    "id": 3,
+    "name": "Hooded Sweatshirt",
+    "price": 39.99,
+    "description": "Pullover hoodie. Front pocket. Drawstring hood.",
+    "fullDescription": "Simple pullover hoodie with a single front pocket and drawstring hood. Basic design. No special lining. Hood may shrink in wash. Drawstrings can get tangled.",
+    "imageUrl": "/public/img/product_1730266405797.png",
+    "stock": 25,
+    "category": "Clothing"
+  },
+  {
+    "id": 4,
+    "name": "Knit Sweater",
+    "price": 59.99,
+    "description": "Long-sleeve sweater. Ribbed cuffs and hem.",
+    "fullDescription": "Long-sleeve knit sweater with ribbed cuffs and hem. Plain design. No patterns. May pill after several wears. Requires careful washing to maintain shape.",
+    "imageUrl": "/public/img/product_1730266422775.png",
+    "stock": 20,
+    "category": "Clothing"
+  },
+  {
+    "id": 5,
+    "name": "Cargo Shorts",
+    "price": 34.99,
+    "description": "Knee-length shorts. Multiple pockets. Button closure.",
+    "fullDescription": "Knee-length cargo shorts with multiple pockets. Button and zipper closure. No stretch in fabric. Pockets may bulge when filled. Wrinkles easily.",
+    "imageUrl": "/public/img/product_1730266440189.png",
+    "stock": 35,
+    "category": "Clothing"
+  },
+  {
+    "id": 6,
+    "name": "Button-Up Shirt",
+    "price": 44.99,
+    "description": "Collared shirt. Long sleeves. Button front.",
+    "fullDescription": "Standard button-up shirt with collar and long sleeves. Plain design. No chest pocket. Requires ironing after wash. Buttons may loosen over time.",
+    "imageUrl": "/public/img/product_1730266457036.png",
+    "stock": 40,
+    "category": "Clothing"
+  },
+  {
+    "id": 7,
+    "name": "Athletic Socks",
+    "price": 12.99,
+    "description": "Ankle-length socks. Pack of 6. Cushioned sole.",
+    "fullDescription": "Pack of 6 basic ankle-length athletic socks. White color only. Cushioned sole may flatten with use. Elastic may loosen after multiple washes.",
+    "imageUrl": "/public/img/product_1730266472683.png",
+    "stock": 100,
+    "category": "Clothing"
+  },
+  {
+    "id": 8,
+    "name": "Leather Belt",
+    "price": 29.99,
+    "description": "Genuine leather belt. Metal buckle. 1.5 inches wide.",
+    "fullDescription": "Plain leather belt, 1.5 inches wide with a basic metal buckle. No design or patterns. Leather may crease with regular use. Buckle prone to scratches.",
+    "imageUrl": "/public/img/product_1730266488931.png",
+    "stock": 45,
+    "category": "Clothing"
+  },
+  {
+    "id": 9,
+    "name": "Windbreaker Jacket",
+    "price": 69.99,
+    "description": "Lightweight jacket. Water-resistant. Zip front.",
+    "fullDescription": "Basic windbreaker jacket with front zipper. Water-resistant but not waterproof. No inner lining. Makes rustling noise when moving. Zipper may stick occasionally.",
+    "imageUrl": "/public/img/product_1730266503984.png",
+    "stock": 15,
+    "category": "Clothing"
+  },
+  {
+    "id": 10,
+    "name": "Knit Beanie",
+    "price": 14.99,
+    "description": "Warm winter hat. One size fits most. Acrylic material.",
+    "fullDescription": "Simple knit beanie made of acrylic material. One size designed to fit most. No special insulation. May cause static in dry conditions. Loses shape easily.",
+    "imageUrl": "/public/img/product_1730266519235.png",
+    "stock": 60,
+    "category": "Clothing"
+  }
+]

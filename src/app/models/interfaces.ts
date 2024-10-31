@@ -8,6 +8,12 @@ export interface Product {
   stock: number;
   category: string;
   fullDescription: string;
+  variations: ProductVariations;
+}
+
+export interface ProductVariations {
+  descriptions: string[];
+  imageUrls: string[];
 }
 
 // cart-item.interface.ts
