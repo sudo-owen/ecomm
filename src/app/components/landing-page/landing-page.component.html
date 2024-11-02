@@ -6,8 +6,6 @@
     <div
       class="grid gap-6 lg:grid-cols-[1fr_400px] lg:gap-12 xl:grid-cols-[1fr_600px]"
     >
-<<<<<<< HEAD
-=======
       <img
         alt="Stylish Apparel"
         class="mx-auto aspect-video overflow-hidden rounded-xl object-cover object-center sm:w-full lg:order-last"
@@ -15,7 +13,6 @@
         src="/public/img/product_1730328250260.png"
         width="550"
       />
->>>>>>> 6e4cb26 (ab_testing_engine)
       <div class="flex flex-col justify-center space-y-4">
         <div class="space-y-2">
           <h1 [ngClass]="(theme$ | async)?.heroSection?.headingText">
@@ -53,22 +50,6 @@
     </h2>
 
     <div class="grid gap-6 lg:grid-cols-3">
-<<<<<<< HEAD
-      <app-feature-card
-        *ngFor="let feature of features"
-        [imageSrc]="feature.imageSrc"
-        [imageAlt]="feature.description"
-        [theme$]="theme$"
-      >
-        <svg
-          icon
-          [ngClass]="(theme$ | async)?.featureCard?.icon"
-          viewBox="0 0 24 24"
-        ></svg>
-        <h3 title>{{ feature.title }}</h3>
-        <p description>{{ feature.description }}</p>
-      </app-feature-card>
-=======
       <div class="bg-white rounded-lg shadow-md p-6">
         <div class="flex flex-col items-center space-y-2 p-6">
           <svg
@@ -141,7 +122,6 @@
           />
         </div>
       </div>
->>>>>>> 6e4cb26 (ab_testing_engine)
     </div>
   </div>
 </section>
