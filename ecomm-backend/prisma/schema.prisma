@@ -1,0 +1,49 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Product {
+  id              Int      @id @default(autoincrement())
+  name            String
+  price           Float
+  description     String
+  imageUrl        String
+  stock           Int
+  category        String
+  fullDescription String
+  variants        ProductVariant[]
+  abTests         ABTest[]
+}
+
+model ProductVariant {
+  id        Int     @id @default(autoincrement())
+  productId Int
+  changes   String  // Store JSON string of changes
+  product   Product @relation(fields: [productId], references: [id])
+
+  abTests   ABTest[]
+}
+
+model ABTest {
+  id          Int      @id @default(autoincrement())
+  productId   Int
+  name        String
+  description String
+  purchases   Int
+
+  productBlob String // TODO: change to JSON
+
+  product     Product  @relation(fields: [productId], references: [id])
+  variants    ProductVariant[]   // Store JSON array of variant IDs
+}

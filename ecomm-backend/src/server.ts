@@ -5,12 +5,14 @@ import { readFile, writeFile } from "fs/promises";
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { generateProductVariations, getProductImageVariations, generateProductImage } from '../llm/ai_variation_engine';
+import { PrismaClient } from '@prisma/client'
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const app = express();
 const port = 3000;
+const prisma = new PrismaClient()
 
 interface Product {
   id: number;
@@ -71,6 +73,36 @@ async function loadProducts() {
   } catch (error) {
     products = [];
     await saveProducts();
+  }
+}
+
+async function populateDatabaseFromFile() {
+  // Populate products table using products.json
+  // checks if empty first
+  const productCount = await prisma.product.count();
+
+  const productsData = await readFile(PRODUCT_FILE, 'utf-8');
+  products = JSON.parse(productsData);
+  
+  if (productCount === 0) {
+    console.log('Products table is empty. Loading data from JSON file...')
+  } else {
+    console.log('Products table is not empty. Skipping JSON import.')
+    return;
+  }
+
+  for (const product of products) {
+    await prisma.product.create({
+      data: {
+        name: product.name,
+        price: product.price,
+        description: product.description,
+        imageUrl: product.imageUrl,
+        stock: product.stock,
+        category: product.category,
+        fullDescription: product.fullDescription
+      }
+    });
   }
 }
 
@@ -157,6 +189,11 @@ async function generateVariants(productId: number) {
     return newVariants;
 }
 
+app.use((req: Request, res: Response, next: () => void) => {
+  next();
+  console.log(`${new Date().toISOString()}: ${req.method} ${req.url} (${res.statusCode})`);
+});
+
 // Add the new endpoint for generating variations
 app.get('/api/generate-variant/:productId', async (req: Request, res: Response) => {
   try {
@@ -179,16 +216,31 @@ app.get('/api/generate-variant/:productId', async (req: Request, res: Response) 
   }
 });
 
-app.get('/api/products', (_req: any, res: { json: (arg0: Product[]) => void; }) => {
-  res.json(products);
+app.get('/api/products', async (_req: Request, res: Response) => {
+  try {
+    const products = await prisma.product.findMany();
+    res.json(products);
+  } catch (error) {
+    console.error('Error fetching products:', error);
+    res.status(500).json({ message: 'Error fetching products' });
+  }
 });
 
-app.get('/api/products/:id', (req: { params: { id: string; }; }, res: { json: (arg0: Product) => void; status: (arg0: number) => { (): any; new(): any; json: { (arg0: { message: string; }): void; new(): any; }; }; }) => {
-  const product = products.find(p => p.id === parseInt(req.params.id));
-  if (product) {
-    res.json(product);
-  } else {
-    res.status(404).json({ message: 'Product not found' });
+app.get('/api/products/:id', async (req: Request, res: Response) => {
+  try {
+    const productId = parseInt(req.params.id);
+    const product = await prisma.product.findUnique({
+      where: { id: productId }
+    });
+    
+    if (product) {
+      res.json(product);
+    } else {
+      res.status(404).json({ message: 'Product not found' });
+    }
+  } catch (error) {
+    console.error('Error fetching product:', error);
+    res.status(500).json({ message: 'Error fetching product' });
   }
 });
 
@@ -252,6 +304,8 @@ async function startServer() {
   await loadProducts();
   await loadProductVariants();
   await loadABTests();
+
+  await populateDatabaseFromFile();
   app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
   });
