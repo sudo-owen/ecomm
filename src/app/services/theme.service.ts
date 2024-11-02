@@ -9,6 +9,8 @@ import { AppTheme } from '../models/themes';
 export class ThemeService {
   static defaultTheme: AppTheme = {
     heroSection: {
+      textContent: 'Discover Your Style with Our Trendy Apparel',
+      subTextContent: 'Designed for your lifestyle. Crafted for comfort. Elevate yourwardrobe with our premium clothing collection.',
       container: 'w-full py-12 md:py-24 lg:py-32 xl:py-48',
       headingText: 'text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none',
       subText: 'text-gray-600 dark:text-gray-400',

@@ -16,11 +16,10 @@
       <div class="flex flex-col justify-center space-y-4">
         <div class="space-y-2">
           <h1 [ngClass]="(theme$ | async)?.heroSection?.headingText">
-            Discover Your Style with Our Trendy Apparel
+            {{ (theme$ | async)?.heroSection?.textContent }}
           </h1>
           <p [ngClass]="(theme$ | async)?.heroSection?.subText">
-            Designed for your lifestyle. Crafted for comfort. Elevate your
-            wardrobe with our premium clothing collection.
+            {{ (theme$ | async)?.heroSection?.subTextContent }}
           </p>
         </div>
         <div class="flex flex-col gap-2 min-[400px]:flex-row">
