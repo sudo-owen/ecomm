@@ -1,6 +1,6 @@
 <div class="flex">
-  <app-sidebar></app-sidebar>
-  <main class="flex-1 ml-64">
+  <app-sidebar (sidebarToggled)="onSidebarToggle($event)"></app-sidebar>
+  <main [class.sidebar-collapsed]="isSidebarCollapsed" class="flex-1">
     <router-outlet></router-outlet>
   </main>
 </div>

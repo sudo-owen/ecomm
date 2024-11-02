@@ -1,4 +1,25 @@
 .sidebar-container {
-  @apply fixed top-0 left-0 h-full bg-white border-r border-gray-200 shadow-sm z-50;
+  @apply fixed top-0 left-0 h-full bg-white border-r border-gray-200 shadow-sm z-50 transition-all duration-300;
   width: 256px;
+}
+
+.sidebar-container.collapsed {
+  width: 72px;
+}
+
+.nav-link {
+  @apply flex items-center px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors relative;
+}
+
+.tooltip {
+  @apply absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-sm rounded whitespace-nowrap opacity-0 pointer-events-none transition-opacity duration-200;
+}
+
+.nav-link:hover .tooltip {
+  @apply opacity-100;
+}
+
+/* Add styles for the collapse button rotation */
+button.rotate-180 {
+  transform: rotate(180deg);
 }
