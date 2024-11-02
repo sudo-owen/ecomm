@@ -2,9 +2,12 @@
   "name": "ecomm-backend",
   "version": "1.0.0",
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.30.1",
+    "axios": "^1.7.7",
     "cors": "^2.8.5",
     "express": "^4.21.1",
-    "lucide-angular": "^0.454.0"
+    "lucide-angular": "^0.454.0",
+    "openai": "^4.69.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",

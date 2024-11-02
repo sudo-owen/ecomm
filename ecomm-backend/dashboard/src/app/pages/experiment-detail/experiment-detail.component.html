@@ -97,18 +97,18 @@
     <div class="p-6 space-y-3">
       <p>
         <span class="font-semibold">Total Impressions:</span>
-        {{ experimentData.totalImpressions }}
+        {{ experimentData.impressions }}
       </p>
       <p>
         <span class="font-semibold">Total Conversions:</span>
-        {{ experimentData.totalConversions }}
+        {{ experimentData.conversions }}
       </p>
       <p>
         <span class="font-semibold">Overall Conversion Rate:</span>
         {{
           calculateConversionRate(
-            experimentData.totalConversions,
-            experimentData.totalImpressions
+            experimentData.conversions,
+            experimentData.impressions
           )
         }}%
       </p>

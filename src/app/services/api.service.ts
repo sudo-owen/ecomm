@@ -24,4 +24,16 @@ export class ApiService {
   getProduct(id: number): Observable<Product> {
     return this.http.get<Product>(`${this.apiUrl}/products/${id}`);
   }
+
+  generateVariations(productId: number): Observable<Product> {
+    return this.http.get<Product>(`${this.apiUrl}/generate-variations/${productId}`);
+  }
+
+  recordABTestResult(productId: number, variationType: 'descriptions' | 'imageUrls', variationIndex: number): Observable<any> {
+    return this.http.post(`${this.apiUrl}/ab-test-result`, { productId, variationType, variationIndex });
+  }
+
+  getABTestResults(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/ab-test-results`);
+  }
 }

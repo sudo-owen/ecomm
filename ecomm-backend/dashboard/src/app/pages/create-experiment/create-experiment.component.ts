@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Experiment } from '../../models/experiment.interface';
 
 interface ExperimentParams {
   duration: string;
@@ -8,11 +9,6 @@ interface ExperimentParams {
   trafficAllocation: string;
 }
 
-interface GeneratedExperiment {
-  name: string;
-  description: string;
-  variants: string[];
-}
 
 @Component({
   selector: 'app-create-experiment',
@@ -22,8 +18,7 @@ interface GeneratedExperiment {
   styleUrls: ['./create-experiment.component.css']
 })
 export class CreateExperimentComponent {
-  prompt = '';
-  generatedExperiment: GeneratedExperiment | null = null;
+  generatedExperiment: Experiment | null = null;
   isLoading = false;
   experimentParams: ExperimentParams = {
     duration: '7',
@@ -34,7 +29,7 @@ export class CreateExperimentComponent {
   async handleSubmit() {
     this.isLoading = true;
     try {
-      this.generatedExperiment = await this.generateExperiment(this.prompt);
+      this.generatedExperiment = await this.generateExperiment(1, 'description');
     } catch (error) {
       console.error("Failed to generate experiment:", error);
     } finally {
@@ -42,13 +37,23 @@ export class CreateExperimentComponent {
     }
   }
 
-  async generateExperiment(prompt: string): Promise<GeneratedExperiment> {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    return {
-      name: "Generated Experiment",
-      description: `This is an automatically generated experiment based on the prompt: "${prompt}"`,
-      variants: ["Control", "Variant A", "Variant B"],
-    };
+  async generateExperiment(productId: number, changeType: string): Promise<Experiment> {
+    const response = await fetch('http://localhost:3000/api/create-ab-test', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        productId: productId,
+        name: `Experiment for Product ${productId}`,
+        description: `A/B test for ${changeType} of product ${productId}`,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return response.json();
   }
 }

@@ -1,0 +1,26 @@
+[
+  {
+    "id": 0,
+    "product": {
+      "id": 1,
+      "name": "Cotton T-Shirt",
+      "price": 19.99,
+      "description": "Basic cotton t-shirt. Short sleeves. Crew neck.",
+      "fullDescription": "Plain cotton t-shirt with short sleeves and a crew neck. No special features. Comes in one color. Minimal stretch. Requires ironing after wash.",
+      "imageUrl": "/public/img/product_1730266364159.png",
+      "stock": 50,
+      "category": "Clothing"
+    },
+    "name": "Experiment for Product 1",
+    "description": "A/B test for description of product 1",
+    "variantIds": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ]
+  }
+]

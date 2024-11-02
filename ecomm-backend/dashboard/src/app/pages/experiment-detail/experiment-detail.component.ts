@@ -2,24 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { LucideAngularModule, ArrowLeft } from 'lucide-angular';
+import { Experiment } from '../../models/experiment.interface';
 
-interface Variant {
-  name: string;
-  impressions: number;
-  conversions: number;
-}
-
-interface ExperimentData {
-  id: number;
-  name: string;
-  status: string;
-  startDate: string;
-  endDate: string;
-  description: string;
-  variants: Variant[];
-  totalImpressions: number;
-  totalConversions: number;
-}
 
 @Component({
   selector: 'app-experiment-detail',
@@ -30,7 +14,7 @@ interface ExperimentData {
 })
 export class ExperimentDetailComponent implements OnInit {
   icons = { ArrowLeft };
-  experimentData: ExperimentData = {
+  experimentData: Experiment = {
     id: 1,
     name: 'Button Color Test',
     status: 'Active',
@@ -42,8 +26,8 @@ export class ExperimentDetailComponent implements OnInit {
       { name: 'Control (Blue)', impressions: 5000, conversions: 500 },
       { name: 'Variant A (Green)', impressions: 5000, conversions: 600 },
     ],
-    totalImpressions: 10000,
-    totalConversions: 1100,
+    impressions: 10000,
+    conversions: 1100,
   };
 
   constructor(
