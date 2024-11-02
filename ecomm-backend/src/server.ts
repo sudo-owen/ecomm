@@ -4,7 +4,7 @@ import cors from "cors";
 import { readFile, writeFile } from "fs/promises";
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
-import { generateProductVariations, getProductImageVariations, generateProductImage } from '../llm/ai_variation_engine';
+import { generateProductVariations, getProductImageVariations, generateProductImage, generateThemeVariations } from '../llm/ai_variation_engine';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -247,14 +247,35 @@ app.post('/api/ab-test-result', (req: Request, res: Response) => {
 app.get('/api/ab-test-results', (req: any, res: { json: (arg0: ABTestResult[]) => void; }) => {
   res.json(abTestResults);
 });
+// Add the new endpoint for generating theme variations
+app.post('/api/generate-theme-variations', async (req: Request, res: Response) => {
+  try {
+    const { elementName, themeParams } = req.body;
+
+    if (!elementName || !themeParams) {
+      return res.status(400).json({ message: 'Missing required fields' });
+    }
+
+    const variations = await generateThemeVariations(elementName, themeParams);
+
+    res.json({ variations });
+  } catch (error) {
+    console.error('Error generating theme variations:', error);
+    res.status(500).json({ message: 'Error generating theme variations' });
+  }
+});
 
 async function startServer() {
-  await loadProducts();
-  await loadProductVariants();
-  await loadABTests();
-  app.listen(port, () => {
-    console.log(`Server is running on http://localhost:${port}`);
-  });
+  try {
+    await loadProducts();
+    await loadProductVariants();
+    await loadABTests();
+    app.listen(port, () => {
+      console.log(`Server is running on http://localhost:${port}`);
+    });
+  } catch (error) {
+    console.error('Error starting server:', error);
+  }
 }
 
-startServer();
+startServer().catch(error => console.error('Unhandled error:', error));
