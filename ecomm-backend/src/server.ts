@@ -38,24 +38,90 @@ interface ABTest {
   result?: ABTestResult 
 }
 
-
 interface ABTestResult {
   productId: number;
   variationType: 'description' | 'image';
   variationIndex: number;
   purchases: number;
 }
+
+// Base export interface for common styles
+export interface BaseStyles {
+  padding?: string;
+  margin?: string;
+  background?: string;
+  rounded?: string;
+  shadow?: string;
+}
+
+// Hero Section Styles
+interface HeroSectionStyles extends BaseStyles {
+  container: string;
+  headingText: string;
+  subText: string;
+  ctaButton: string;
+  imageContainer: string;
+  textContent: string;
+  subTextContent: string;
+}
+
+// Feature Card Styles
+interface FeatureCardStyles extends BaseStyles {
+  container: string;
+  icon: string;
+  title: string;
+  description: string;
+  image: string;
+}
+
+// Testimonial Card Styles
+interface TestimonialCardStyles extends BaseStyles {
+  container: string;
+  starIcon: string;
+  quote: string;
+  authorContainer: string;
+  authorName: string;
+  authorTitle: string;
+}
+
+// Product Card Styles
+interface ProductCardStyles extends BaseStyles {
+  container: string;
+  title: string;
+  description: string;
+  price: string;
+  ctaButton: string;
+}
+
+// Product Holder Styles
+interface ProductHolderStyles extends BaseStyles {
+  container: string;
+  numItems: number;
+}
+
+// Main Theme Interface
+interface AppTheme {
+  heroSection: HeroSectionStyles;
+  featureCard: FeatureCardStyles;
+  testimonialCard: TestimonialCardStyles;
+  productCard: ProductCardStyles;
+  productHolder: ProductHolderStyles;
+}
+
+
 app.use(cors());
 app.use(express.json());
 app.use('/public', express.static(join(__dirname, 'public')));
 
 const PRODUCT_FILE = join(__dirname, 'public', 'data', 'products.json');
+const THEME_FILE = join(__dirname, 'public', 'data', 'themes.json');
 const PRODUCT_VARIANTS_FILE = join(__dirname, 'public', 'data', 'product_variants.json');
 const AB_TESTS_FILE = join(__dirname, 'public', 'data', 'ab_tests.json');
 const IMAGES_FOLDER = join(__dirname, 'public', 'img');
 
 let products: Product[] = [];
 let abTests: ABTest[] = [];
+let theme: AppTheme | undefined = undefined;
 const abTestResults: ABTestResult[] = [];
 
 let productVariantMetadata = {
@@ -71,6 +137,14 @@ async function loadProducts() {
   } catch (error) {
     products = [];
     await saveProducts();
+  }
+}
+
+async function loadThemes() {
+  try {
+    const themeData = await readFile(THEME_FILE, 'utf-8');
+    theme = JSON.parse(themeData);
+  } catch (error) {
   }
 }
 
@@ -265,11 +339,17 @@ app.post('/api/generate-theme-variations', async (req: Request, res: Response) =
   }
 });
 
+// Getter for themes
+app.get('/api/themes', (_req: any, res: { json: (arg0: AppTheme) => void; }) => {
+  res.json(theme!);
+});
+
 async function startServer() {
   try {
     await loadProducts();
     await loadProductVariants();
     await loadABTests();
+    await loadThemes();
     app.listen(port, () => {
       console.log(`Server is running on http://localhost:${port}`);
     });

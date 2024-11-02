@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { Product } from '../models/interfaces';
+import { AppTheme } from '../models/themes';
 
 @Injectable({
   providedIn: 'root'
@@ -23,6 +24,10 @@ export class ApiService {
 
   getProduct(id: number): Observable<Product> {
     return this.http.get<Product>(`${this.apiUrl}/products/${id}`);
+  }
+
+  getTheme(): Observable<AppTheme> {
+    return this.http.get<AppTheme>(`${this.apiUrl}/themes`);
   }
 
   generateVariations(productId: number): Observable<Product> {
