@@ -14,6 +14,7 @@ const app = express();
 const port = 3000;
 const prisma = new PrismaClient()
 
+
 interface Product {
   id: number;
   name: string;
@@ -34,12 +35,21 @@ interface ProductVariant {
 interface ABTest {
   id: number,
   product: Product,
+  productId: number,
   name: string,
   description: string,
   variantIds: number[]
   result?: ABTestResult 
 }
 
+interface ABTestReponse {
+  id: number,
+  product: Product,
+  name: string,
+  description: string,
+  variant: ProductVariant[],
+  result?: ABTestResult 
+}
 
 interface ABTestResult {
   productId: number;
@@ -264,6 +274,7 @@ app.post('/api/create-ab-test', async (req: Request, res: Response) => {
   const newABTest: ABTest = {
     id: 0,
     product: product,
+    productId: productId,
     name: name,
     description: description,
     variantIds: generatedVariants.map(v => v.id)
@@ -295,6 +306,40 @@ app.post('/api/ab-test-result', (req: Request, res: Response) => {
   saveABTestResults();
   res.json({ message: 'A/B test result recorded' });
 });
+
+
+app.get('/api/ab-test/:id', (req: Request, res: Response) => {
+  const id: number = parseInt(req.params.id);
+
+  const abTest = abTests.find(t => t.id === id);
+  if (!abTest) {
+    return res.status(404).json({ message: 'A/B test not found' });
+  }
+  const abTestResponse: any = {...abTest};
+  delete abTestResponse.variantIds;
+
+  abTestResponse.variants = abTest.variantIds.map(id => productVariants.find(v => v.id === id));
+
+  res.json(abTestResponse);
+});
+
+app.put('api/ab-config', (req: Request, res: Response) => {
+  const { type, info, enabled } = req.body;
+
+  if (type === 'product') {
+    const product = products.find(p => p.id === info.id); 
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+
+  } else if (type === 'ui') {
+    res.status(500).json({"message": "UI config not implemented"});
+  } else {
+    res.status(400).json({"message": "Invalid config type"});
+  }
+
+}
+
 
 app.get('/api/ab-test-results', (req: any, res: { json: (arg0: ABTestResult[]) => void; }) => {
   res.json(abTestResults);
