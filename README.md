@@ -45,7 +45,7 @@ The dashboard can run on any available port. It will automatically connect to th
 - The frontend must run on port 4200 for the A/B testing functionality to work
 - Start the applications in this order:
   1. Frontend (port 4200)
-  2. Backend server
+  2. Backend server (port 3000)
   3. Dashboard (any port)
 - The dashboard needs both the frontend and backend to be running to function properly
 

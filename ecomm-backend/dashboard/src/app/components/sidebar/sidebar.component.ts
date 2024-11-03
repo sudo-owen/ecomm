@@ -7,6 +7,7 @@ import {
   List,
   PlusCircle,
   ChevronLeft,
+  FlaskConical
 } from 'lucide-angular';
 
 @Component({
@@ -21,7 +22,7 @@ export class SidebarComponent {
 
   currentPage = 'home';
   isExpanded = true;
-  icons = { Home, List, PlusCircle, ChevronLeft };
+  icons = { Home, List, PlusCircle, ChevronLeft, FlaskConical };
 
   setCurrentPage(page: string) {
     this.currentPage = page;

@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { LucideAngularModule, Target, Trash2 } from 'lucide-angular';
+import { Crosshair, LucideAngularModule, Target, Trash2 } from 'lucide-angular';
 import { Subscription } from 'rxjs';
 import { IframeCommunicationService } from '../../services/iframe-communication.service';
 import {
@@ -23,7 +23,7 @@ export class CreateExperimentComponent implements OnInit, OnDestroy {
   iframeUrl;
   isSelectionMode = false;
   iframeLoaded = false;
-  icons = { Target, Trash2 };
+  icons = { Target, Trash2, Crosshair };
   private subscription = new Subscription();
 
   experimentParams: ExperimentParams = {
