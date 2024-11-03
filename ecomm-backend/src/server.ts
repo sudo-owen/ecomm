@@ -1,11 +1,10 @@
 import express from "express";
 import type { Request, Response } from "express";
-import cors from "cors";
 import { readFile, writeFile } from "fs/promises";
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { generateProductVariations, getProductImageVariations, generateProductImage } from '../llm/ai_variation_engine';
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient, Prisma } from '@prisma/client'
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -57,8 +56,7 @@ interface ABTestResult {
   variationIndex: number;
   purchases: number;
 }
-app.use(cors());
-app.use(express.json());
+app.use(express.json())
 app.use('/public', express.static(join(__dirname, 'public')));
 
 const PRODUCT_FILE = join(__dirname, 'public', 'data', 'products.json');
@@ -161,13 +159,7 @@ async function saveABTestResults() {
   await writeFile(resultsPath, JSON.stringify(abTestResults, null, 2));
 }
 
-async function generateVariants(productId: number) {
-    const product = products.find(p => p.id === productId);
-
-    if (!product) {
-      return undefined;
-    }
-
+async function generateVariants(product: Product) {
     const descriptionVariant = await generateProductVariations(product.fullDescription);
     const imageVariant = await getProductImageVariations(product.fullDescription);
 
@@ -196,6 +188,8 @@ async function generateVariants(productId: number) {
       newVariants.push(newVariant);
     });
 
+    console.log("newVariants: " + newVariants);
+
     return newVariants;
 }
 
@@ -204,28 +198,25 @@ app.use((req: Request, res: Response, next: () => void) => {
   console.log(`${new Date().toISOString()}: ${req.method} ${req.url} (${res.statusCode})`);
 });
 
-// Add the new endpoint for generating variations
-app.get('/api/generate-variant/:productId', async (req: Request, res: Response) => {
-  try {
-    const productId = parseInt(req.params.productId);
+app.use((err: any, req: Request, res: Response, next: any): any => {
+  if (err) {
+    console.error('Error:', err.message);
+    console.error('Stack:', err.stack);
 
-    const generatedVariants = await generateVariants(productId);
-    if (!generatedVariants) {
-      return res.status(404).json({ message: 'Product not found' });
-    }
-
-    productVariants.push(...generatedVariants);
-
-    // Save the updated products
-    saveProductVariants();
-
-    res.json({ message: 'Variants generated successfully'});
-  } catch (error) {
-    console.error('Error generating variants:', error);
-    res.status(500).json({ message: 'Error generating variants' });
+    // Send error response
+    return res.status(500).json({
+      error: {
+        message: 'Internal Server Error',
+        // Only include error details in development
+        details: process.env.NODE_ENV === 'development' ? err.message : undefined
+      }
+    });
   }
+  next();
 });
 
+
+// API for customer website ---------------------------------------
 app.get('/api/products', async (_req: Request, res: Response) => {
   try {
     const products = await prisma.product.findMany();
@@ -253,7 +244,222 @@ app.get('/api/products/:id', async (req: Request, res: Response) => {
     res.status(500).json({ message: 'Error fetching product' });
   }
 });
+// ---------------------------------------------------------
 
+
+
+function variantToDatabaseVariant(variant: ProductVariant, abTestId: number) {
+  let databaseVariant: any = {};
+  databaseVariant.changes = JSON.stringify(variant.changes);
+  databaseVariant.product = {
+    connect: {
+      id: variant.productId
+    }
+  };
+  /*
+  databaseVariant.abTest = {
+    connect: {
+      id: abTestId
+    }
+  };*/
+  return databaseVariant;
+}
+
+async function generateABTest(config, abTest) {
+  try {
+    const variants: ProductVariant[] = await generateVariants(config.product);
+    const databaseVariants = variants.map(
+      v => variantToDatabaseVariant(v, abTest.id)
+    );
+
+    // TODO: name and description
+    const newABTest = await prisma.abTest.update({
+      where: {
+        id: abTest.id,
+      },
+      data: {
+        variants: {
+          create: databaseVariants
+        }
+      }
+    });
+
+    if (!newABTest) {
+      throw new Error('Error creating A/B test');
+
+    }
+    return newABTest;
+
+  } catch (error) {
+    console.error('Error generating A/B test:', error);
+    const newABTest = await prisma.abTest.update({
+      where: {
+        id: abTest.id,
+      },
+      data: {
+        status: 'error'
+      }
+    });
+    return null;
+  }
+}
+
+async function updateProductAbTest(enabled: boolean, config: Prisma.AbConfig, res: Response) {
+  if (enabled) {
+    let abTest = await prisma.abTest.findFirst({
+      where: {
+        AND: [
+          { configId: config.id },
+          {
+            NOT: { status: 'finished' }
+          },
+          {
+            NOT: { status: 'error' }
+          }
+        ]
+      },
+    });
+
+    if (!abTest) {
+      abTest = await prisma.abTest.create({
+        data: {
+          name: ('Experiment for Product ' + config.productId +
+            ' (' + config.type + ')'),
+          description: ('A/B test for ' + config.type +
+            ' of product ' + config.productId),
+          purchases: 0,
+          status: 'new',
+          productBlob: JSON.stringify(config.product),
+          abConfig: {
+            connect: {
+              id: config.id
+            }
+          }
+        }
+      });
+      res.status(202).json({
+        abTest: abTest,
+        message: 'A/B test enabled'
+      });
+
+      const newAbTest = await generateABTest(config, abTest);
+    } else {
+      res.status(200).json({
+        abTest: abTest,
+        message: 'A/B test already exists'
+      });
+    }
+
+
+  } else {
+    await prisma.abTest.updateMany({
+      where: {
+        AND: [
+          { configId: config.id },
+          {
+            NOT: { status: 'finished' }
+          }
+        ]
+      },
+      data: {
+        status: 'finished'
+      }
+    });
+
+    res.status(200).json({ message: 'A/B test disabled' });
+  }
+}
+
+function catchErrorsDecorator(func: any) {
+  return async (req: Request, res: Response, next: any) => {
+    try {
+      return await func(req, res);
+    } catch (error) {
+      console.error('Error:', error);
+      return next(error);
+    }
+  };
+}
+
+// API for dashboard ---------------------------------------
+app.get('/api/ab-test-configs', catchErrorsDecorator(
+  async (req: Request, res: Response) => {
+  const configs = await prisma.productAbConfig.findMany();
+  res.status(200).json(configs);
+  }
+));
+
+app.post('/api/ab-test-configs/:type', catchErrorsDecorator(
+  async (req: Request, res: Response) => {
+  const { info, enabled } = req.body;
+  const type = req.params.type;
+
+  if (!type || !info || enabled == null) {
+    return res.status(400).json({ message: 'Missing required fields' });
+  }
+
+  if (type === 'product') {
+    const config = await prisma.productAbConfig.create({
+      data: {
+        enabled: enabled,
+        product: {
+          connect: { 
+            id: info.productId
+          }
+        },
+        type: info.type,
+      },
+      include: {
+        product: true
+      }
+    });
+    if (config) {
+      updateProductAbTest(enabled, config, res);
+    } else {
+      res.status(500).json({ message: 'Error creating A/B test' });
+    }
+  } else {
+    res.status(400).json({ message: 'Unsupported config type' });
+  }
+}));
+
+app.put('/api/ab-test-configs/:type/:id', catchErrorsDecorator(
+  async (req: Request, res: Response) => {
+  const { enabled } = req.body;
+  const info = req.body.info ?? {};
+  const configId = parseInt(req.params.id);
+  const type = req.params.type;
+
+  if (enabled == null || !configId || !type) {
+    return res.status(400).json({ message: 'Missing required fields' });
+  }
+  console.log("configId: " + configId);
+  
+  let config = null;
+  try {
+    config = await prisma.productAbConfig.update({
+      where: { id: configId },
+      data: {
+        enabled: enabled
+      },
+      include: {
+        product: true
+      }
+    });
+  } catch (error) {
+    console.error('Error creating A/B test:', error);
+    res.status(400).json({ message: 'Config not found' });
+    return;
+  }
+
+  updateProductAbTest(enabled, config, res);
+
+}));
+
+// ---------------------------------------------------------
+
+
+// Deprecated: 
 app.post('/api/create-ab-test', async (req: Request, res: Response) => {
   const { productId, name, description } = req.body;
 
@@ -266,7 +472,7 @@ app.post('/api/create-ab-test', async (req: Request, res: Response) => {
     return res.status(404).json({ message: 'Product not found' });
   }
 
-  const generatedVariants = await generateVariants(productId);
+  const generatedVariants = await generateVariants(product);
   if (!generatedVariants) {
     return res.status(404).json({ message: 'Product not found' });
   }
@@ -323,26 +529,36 @@ app.get('/api/ab-test/:id', (req: Request, res: Response) => {
   res.json(abTestResponse);
 });
 
-app.put('api/ab-config', (req: Request, res: Response) => {
-  const { type, info, enabled } = req.body;
 
-  if (type === 'product') {
-    const product = products.find(p => p.id === info.id); 
+app.get('/api/ab-test-results', (req: any, res: { json: (arg0: ABTestResult[]) => void; }) => {
+  res.json(abTestResults);
+});
+
+// Add the new endpoint for generating variations
+app.get('/api/generate-variant/:productId', async (req: Request, res: Response) => {
+  try {
+    const productId = parseInt(req.params.productId);
+
+    const product = products.find(p => p.id === productId);
     if (!product) {
       return res.status(404).json({ message: 'Product not found' });
     }
 
-  } else if (type === 'ui') {
-    res.status(500).json({"message": "UI config not implemented"});
-  } else {
-    res.status(400).json({"message": "Invalid config type"});
+    const generatedVariants = await generateVariants(product);
+    if (!generatedVariants) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+
+    productVariants.push(...generatedVariants);
+
+    // Save the updated products
+    saveProductVariants();
+
+    res.json({ message: 'Variants generated successfully'});
+  } catch (error) {
+    console.error('Error generating variants:', error);
+    res.status(500).json({ message: 'Error generating variants' });
   }
-
-}
-
-
-app.get('/api/ab-test-results', (req: any, res: { json: (arg0: ABTestResult[]) => void; }) => {
-  res.json(abTestResults);
 });
 
 async function startServer() {

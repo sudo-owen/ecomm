@@ -23,27 +23,39 @@ model Product {
   category        String
   fullDescription String
   variants        ProductVariant[]
-  abTests         ABTest[]
+  abConfig        ProductAbConfig[] 
 }
 
 model ProductVariant {
   id        Int     @id @default(autoincrement())
   productId Int
+  abTestId  Int     
   changes   String  // Store JSON string of changes
   product   Product @relation(fields: [productId], references: [id])
 
-  abTests   ABTest[]
+  abTest    AbTest  @relation(fields: [abTestId], references: [id])
 }
 
-model ABTest {
-  id          Int      @id @default(autoincrement())
+model ProductAbConfig {
+  id          Int     @id @default(autoincrement())
+  enabled     Boolean
   productId   Int
+  type        String
+
+  product     Product @relation(fields: [productId], references: [id])
+  abTests     AbTest[]
+}
+
+model AbTest {
+  id          Int      @id @default(autoincrement())
+  configId    Int
   name        String
   description String
   purchases   Int
+  status      String
 
-  productBlob String // TODO: change to JSON
+  productBlob String 
 
-  product     Product  @relation(fields: [productId], references: [id])
+  abConfig    ProductAbConfig @relation(fields: [configId], references: [id])
   variants    ProductVariant[]   // Store JSON array of variant IDs
 }
