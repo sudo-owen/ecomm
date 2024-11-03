@@ -836,6 +836,8 @@ app.put('/api/variant/visit', catchErrorsDecorator(
       });
     }
 
+    res.status(200).json({ message: 'Visit recorded' });
+
 
   }
 ));
@@ -899,6 +901,7 @@ app.put('/api/variant/conversion', catchErrorsDecorator(
         }
       });
     }
+    res.status(200).json({ message: 'Conversion recorded' });
   }
 ));
 
