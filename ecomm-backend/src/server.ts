@@ -5,6 +5,7 @@ import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { PrismaClient, Prisma } from '@prisma/client'
 import { generateProductVariations, getProductImageVariations, generateProductImage, generateThemeVariations } from '../llm/ai_variation_engine';
+import * as crypto from 'crypto';
 import cors from "cors";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -186,11 +187,6 @@ async function populateDatabaseFromFile() {
       productId: product.id,
       type: 'description'
     }, false, null);
-
-    createProductABTest({
-      productId: product.id,
-      type: 'image'
-    }, false, null);
   }
 }
 
@@ -248,7 +244,7 @@ async function saveABTestResults() {
   await writeFile(resultsPath, JSON.stringify(abTestResults, null, 2));
 }
 
-async function generateVariants(product: Product): Promise<ProductVariant[]> {
+async function generateVariants(product: Product) {
     const descriptionVariant = await generateProductVariations(product.fullDescription);
     const imagePromptVariant = await getProductImageVariations(product.fullDescription);
     const newVariants: ProductVariant[] = [];
@@ -288,6 +284,34 @@ app.use((req: Request, res: Response, next: () => void) => {
   console.log(`${new Date().toISOString()}: ${req.method} ${req.url} (${res.statusCode})`);
 });
 
+app.use(async (req: Request, res: Response, next: () => void) => {
+  let session_id = req.header('X-Ddd-Session-Id');
+  let session = null;
+  if (!session_id) {
+    session = await prisma.session.create({
+      data: {}
+    });
+  } else {
+    session = await prisma.session.upsert({
+      where: {
+        id: session_id
+      },
+      update: {},
+      create: {}
+    });
+  }
+
+  if (session) {
+    session_id = session.id;
+  } else {
+    res.status(500).json({ message: 'Error creating session' });
+    return;
+  }
+  res.set('X-Ddd-Session-Id', session_id);
+  res.locals.session_id = session_id;
+  next();
+});
+
 app.use((err: any, req: Request, res: Response, next: any): any => {
   if (err) {
     console.error('Error:', err.message);
@@ -305,12 +329,135 @@ app.use((err: any, req: Request, res: Response, next: any): any => {
   next();
 });
 
+const VARIANT_PROBABILITY: number = 0.7;
+
+
+async function getProductWithVariant(product: Product, session_id: string) {
+  const variant = await prisma.productVariant.findFirst({
+    where: {
+      productId: product.id,
+      sessions: {
+        some: {
+          id: session_id
+        }
+      },
+      abTest: {
+        status: 'ongoing'
+      }
+    },
+  });
+
+  const isDefault = await prisma.abTest.findFirst({
+    where: {
+      abConfig: {
+        productId: product.id,
+      },
+      sessionsWithDefault: {
+        some: {
+          id: session_id
+        }
+      },
+      status: 'ongoing'
+    },
+  });
+
+  if (variant) {
+    console.log(`Variant(${variant.id}) for product(${product.id}) session(${session_id})`);
+    
+    const changes = JSON.parse(variant.changes);
+    //console.log(`Changes (${product.id}): `, changes);
+    product = { ...product, ...changes };
+  } else if (isDefault) {
+    console.log(`Default for product(${product.id}) session(${session_id})`);
+  } else {
+    console.log(`No variant for product(${product.id}) session(${session_id})`);
+    const variants = await prisma.productVariant.findMany({
+      where: {
+        abTest: {
+          status: 'ongoing'
+        },
+        productId: product.id
+      },
+      orderBy: {
+        id: 'asc'
+      }
+    });
+    console.log('Variants: ', variants);
+
+    let random = Math.random();
+
+    const abTest = await prisma.abTest.findFirst({
+      where: {
+        abConfig: {
+          productId: product.id
+        },
+        status: 'ongoing'
+      }
+    });
+
+    if (abTest) {
+
+      if (random > VARIANT_PROBABILITY || variants.length === 0) {
+        console.log('Using default variant for product', product.id);
+        const updatedSession = await prisma.session.update({
+          where: {
+            id: session_id
+          },
+          data: {
+            defaultAbTests: {
+              connect: {
+                id: abTest.id
+              }
+            }
+          }
+        });
+      } else {
+        console.log('Using variant for product', product.id);
+        random /= VARIANT_PROBABILITY;
+        random *= variants.length;
+
+        const variantIndex = Math.min(Math.floor(random), variants.length - 1);
+        const newVariant = variants[variantIndex];
+
+        const updatedProductVariant = await prisma.productVariant.update({
+          where: {
+            id: newVariant.id
+          },
+          data: {
+            sessions: {
+              connect: {
+                id: session_id
+              }
+            }
+          }
+        });
+
+        const changes = JSON.parse(newVariant.changes);
+        //console.log(`Changes (${product.id}): `, changes);
+        
+        product = {...product, ...changes};
+      }
+    } else {
+      console.log(`No ABTest for product(${product.id}) session(${session_id})`);
+    }
+  }
+
+  return product;
+}
 
 // API for customer website ---------------------------------------
-app.get('/api/products', async (_req: Request, res: Response) => {
+app.get('/api/products', async (req: Request, res: Response) => {
   try {
+    const session_id = res.locals.session_id;
     const products = await prisma.product.findMany();
-    res.json(products);
+
+    const variantProducts = await Promise.all(
+      products.map(
+        p => getProductWithVariant(p, session_id)
+      )
+    );
+
+    res.status(200).json(variantProducts);
   } catch (error) {
     console.error('Error fetching products:', error);
     res.status(500).json({ message: 'Error fetching products' });
@@ -319,13 +466,16 @@ app.get('/api/products', async (_req: Request, res: Response) => {
 
 app.get('/api/products/:id', async (req: Request, res: Response) => {
   try {
+    const session_id = res.locals.session_id;
     const productId = parseInt(req.params.id);
     const product = await prisma.product.findUnique({
       where: { id: productId }
     });
     
     if (product) {
-      res.json(product);
+      const variantProduct = await getProductWithVariant(product, session_id);
+      console.log('Variant Product: ', variantProduct);
+      res.json(variantProduct);
     } else {
       res.status(404).json({ message: 'Product not found' });
     }
@@ -346,12 +496,6 @@ function variantToDatabaseVariant(variant: ProductVariant, abTestId: number) {
       id: variant.productId
     }
   };
-  /*
-  databaseVariant.abTest = {
-    connect: {
-      id: abTestId
-    }
-  };*/
   return databaseVariant;
 }
 
@@ -370,7 +514,8 @@ async function generateABTest(config, abTest) {
       data: {
         variants: {
           create: databaseVariants
-        }
+        },
+        status: 'ongoing'
       }
     });
 
@@ -417,7 +562,6 @@ async function updateProductAbTest(enabled: boolean, config: Prisma.ProductAbCon
             ' (' + config.type + ')'),
           description: ('A/B test for ' + config.type +
             ' of product ' + config.productId),
-          purchases: 0,
           status: 'new',
           productBlob: JSON.stringify(config.product),
           abConfig: {
@@ -537,12 +681,6 @@ app.post('/api/ab-test-configs/:type', catchErrorsDecorator(
   }
 }));
 
-app.get('/api/ab-test', catchErrorsDecorator(
-  async (req: Request, res: Response) => {
-    const abTests = await prisma.abTest.findMany();
-    res.status(200).json(abTests);
-  }
-));
 
 app.put('/api/ab-test-configs/:type/:id', catchErrorsDecorator(
   async (req: Request, res: Response) => {
@@ -576,6 +714,55 @@ app.put('/api/ab-test-configs/:type/:id', catchErrorsDecorator(
   updateProductAbTest(enabled, config, res);
 
 }));
+
+app.get('/api/ab-test', catchErrorsDecorator(
+  async (req: Request, res: Response) => {
+    const abTests = await prisma.abTest.findMany();
+    res.status(200).json(abTests);
+  }
+));
+
+app.put('/api/ab-test', catchErrorsDecorator(
+  async (req: Request, res: Response) => {
+    const { abTestId, enabled } = req.body;
+  }
+));
+
+app.put('/api/variant/:id/visit', catchErrorsDecorator(
+  async (req: Request, res: Response) => {
+    const variantId = parseInt(req.params.id);
+    if (!variantId) {
+      return res.status(400).json({ message: 'Invalid variant id' });
+    }
+
+    await prisma.productVariant.update({
+      where: { id: variantId },
+      data: {
+        visits: {
+          increment: 1
+        }
+      }
+    });
+  }
+));
+
+app.put('/api/variant/:id/conversion', catchErrorsDecorator(
+  async (req: Request, res: Response) => {
+    const variantId = parseInt(req.params.id);
+    if (!variantId) {
+      return res.status(400).json({ message: 'Invalid variant id' });
+    }
+
+    await prisma.productVariant.update({
+      where: { id: variantId },
+      data: {
+        conversions: {
+          increment: 1
+        }
+      }
+    });
+  }
+));
 
 // ---------------------------------------------------------
 
@@ -691,7 +878,6 @@ app.get('/api/generate-variant/:productId', async (req: Request, res: Response) 
     if (!generatedVariants) {
       return res.status(404).json({ message: 'Product not found' });
     }
-    console.log("generatedVariants: " + generatedVariants);
     productVariants.push(...generatedVariants);
 
     // Save the updated products
