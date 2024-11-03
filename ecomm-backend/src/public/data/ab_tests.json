@@ -1,6 +1,7 @@
 [
   {
     "id": 0,
+    "productId": 1,
     "product": {
       "id": 1,
       "name": "Cotton T-Shirt",
