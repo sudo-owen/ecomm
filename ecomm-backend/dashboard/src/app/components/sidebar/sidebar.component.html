@@ -1,6 +1,20 @@
-<aside class="sidebar-container">
-  <div class="p-6 border-b border-gray-200">
-    <h1 class="text-2xl font-bold">AB Test Dashboard</h1>
+<aside [class.collapsed]="!isExpanded" class="sidebar-container">
+  <div class="p-4 border-b border-gray-200 flex items-center justify-between">
+    <div class="flex items-center">
+      <h1
+        *ngIf="isExpanded"
+        class="text-2xl font-bold transition-opacity duration-200"
+      >
+        AB Test Dashboard
+      </h1>
+    </div>
+    <button
+      (click)="toggleSidebar()"
+      class="p-2 hover:bg-gray-100 rounded-lg transition-all duration-300"
+      [class.rotate-180]="!isExpanded"
+    >
+      <lucide-icon [name]="icons.ChevronLeft" class="h-5 w-5"></lucide-icon>
+    </button>
   </div>
 
   <nav class="p-3 space-y-1">
@@ -8,30 +22,48 @@
       routerLink="/"
       (click)="setCurrentPage('home')"
       [class.bg-gray-100]="currentPage === 'home'"
-      class="flex items-center px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+      class="nav-link"
     >
       <lucide-icon [name]="icons.Home" class="h-5 w-5"></lucide-icon>
-      <span class="ml-3">Overview</span>
+      <span
+        [class.hidden]="!isExpanded"
+        class="ml-3 transition-opacity duration-200"
+      >
+        Overview
+      </span>
+      <span *ngIf="!isExpanded" class="tooltip"> Overview </span>
     </a>
 
     <a
       routerLink="/experiments"
       (click)="setCurrentPage('list')"
       [class.bg-gray-100]="currentPage === 'list'"
-      class="flex items-center px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+      class="nav-link"
     >
       <lucide-icon [name]="icons.List" class="h-5 w-5"></lucide-icon>
-      <span class="ml-3">Experiments List</span>
+      <span
+        [class.hidden]="!isExpanded"
+        class="ml-3 transition-opacity duration-200"
+      >
+        List
+      </span>
+      <span *ngIf="!isExpanded" class="tooltip"> List </span>
     </a>
 
     <a
       routerLink="/create"
       (click)="setCurrentPage('create')"
       [class.bg-gray-100]="currentPage === 'create'"
-      class="flex items-center px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+      class="nav-link"
     >
       <lucide-icon [name]="icons.PlusCircle" class="h-5 w-5"></lucide-icon>
-      <span class="ml-3">Create Advanced</span>
+      <span
+        [class.hidden]="!isExpanded"
+        class="ml-3 transition-opacity duration-200"
+      >
+        Create
+      </span>
+      <span *ngIf="!isExpanded" class="tooltip"> Create </span>
     </a>
   </nav>
 </aside>

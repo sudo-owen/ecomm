@@ -4,7 +4,6 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { LucideAngularModule, ArrowLeft } from 'lucide-angular';
 import { Experiment } from '../../models/experiment.interface';
 
-
 @Component({
   selector: 'app-experiment-detail',
   standalone: true,
