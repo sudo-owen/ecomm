@@ -11,7 +11,8 @@ import { Experiment } from '../../models/experiment.interface';
   styleUrls: ['./experiments-list.component.css'],
 })
 export class ExperimentsListComponent {
-  allExperiments: Experiment[] = [
+  allExperiments: Experiment[] = []
+  /*
     {
       id: 1,
       name: 'Button Color Test',
@@ -68,6 +69,28 @@ export class ExperimentsListComponent {
       variants: [],
     },
   ];
+  */
+
+  ngOnInit() {
+    fetch('http://localhost:3000/api/ab-tests').then((response) => {
+      response.json().then((data) => {
+        try {
+          data.forEach((experiment: any) => {
+            experiment.product = JSON.parse(experiment.productBlob);
+          });
+        } catch (error) {
+          console.log(error);
+        }
+
+        data = data.filter((experiment: any) => experiment.status === 'ongoing').sort(
+          (a: any, b: any) => {
+            return a.product.id - b.product.id;
+          }
+        )
+        this.allExperiments = data;
+      });
+    });
+  }
 
   getConversionRate(conversions: number, impressions: number): string {
     return ((conversions / impressions) * 100).toFixed(2);

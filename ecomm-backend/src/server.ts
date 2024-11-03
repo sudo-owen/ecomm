@@ -4,7 +4,7 @@ import { readFile, writeFile } from "fs/promises";
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { PrismaClient, Prisma } from '@prisma/client'
-import { generateProductVariations, getProductImageVariations, generateProductImage, generateThemeVariations } from '../llm/ai_variation_engine';
+import { generateProductVariations, getProductImageVariations, generateProductImage, generateThemeVariations, generateExperimentNameDescription } from '../llm/ai_variation_engine';
 import * as crypto from 'crypto';
 import cors from "cors";
 
@@ -506,6 +506,8 @@ async function generateABTest(config, abTest) {
       v => variantToDatabaseVariant(v, abTest.id)
     );
 
+    const {name, description} = await generateExperimentNameDescription(config.product, variants);
+
     // TODO: name and description
     const newABTest = await prisma.abTest.update({
       where: {
@@ -515,7 +517,9 @@ async function generateABTest(config, abTest) {
         variants: {
           create: databaseVariants
         },
-        status: 'ongoing'
+        status: 'ongoing',
+        name: name,
+        description: description
       }
     });
 
@@ -715,18 +719,37 @@ app.put('/api/ab-test-configs/:type/:id', catchErrorsDecorator(
 
 }));
 
-app.get('/api/ab-test', catchErrorsDecorator(
+app.get('/api/ab-tests', catchErrorsDecorator(
   async (req: Request, res: Response) => {
     const abTests = await prisma.abTest.findMany();
     res.status(200).json(abTests);
   }
 ));
 
-app.put('/api/ab-test', catchErrorsDecorator(
+app.get('/api/ab-test/:id', catchErrorsDecorator(
   async (req: Request, res: Response) => {
-    const { abTestId, enabled } = req.body;
+    const abTestId = parseInt(req.params.id);
+    if (!abTestId) {
+      return res.status(400).json({ message: 'Invalid A/B test id' });
+    }
+
+    const abTest = await prisma.abTest.findUnique(
+      {
+        where: {
+          id: abTestId
+        },
+        include: {
+          product: true
+        }
+      }
+    );
+    if (!abTest) {
+      return res.status(404).json({ message: 'A/B test not found' });
+    }
+    res.status(200).json(abTest);
   }
 ));
+
 
 app.put('/api/variant/:id/visit', catchErrorsDecorator(
   async (req: Request, res: Response) => {
