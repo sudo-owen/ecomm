@@ -35,7 +35,9 @@ export class ExperimentsListComponent implements OnInit {
   }
 
   getTotalVisits(experiment: any): number {
-    return experiment.variants.reduce((total: number, variant: any) => total + variant.visits, 0);
+    let visits = experiment.variants.reduce((total: number, variant: any) => total + variant.visits, 0);
+    visits += experiment.defaultVisits;
+    return visits;
   }
 
   getBestConversionRate(experiment: any): number {
@@ -47,6 +49,7 @@ export class ExperimentsListComponent implements OnInit {
 
   getDefaultConversionRate(experiment: any): number {
     // Mock implementation - replace with actual logic to get default rate
-    return 2.0; // 2% as an example
+    if (experiment.defaultVisits === 0) return 0;
+    return experiment.defaultConversions / experiment.defaultVisits * 100; // 2% as an example
   }
 }

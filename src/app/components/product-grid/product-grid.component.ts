@@ -6,6 +6,7 @@ import { Subscription } from 'rxjs';
 import { Product } from '../../models/interfaces';
 import { CartService } from '../../services/cart.service';
 import { ProductService } from '../../services/product.service';
+import { ApiService } from '../../services/api.service';
 
 @Component({
   selector: 'app-product-grid',
@@ -20,13 +21,17 @@ export class ProductGridComponent implements OnInit, OnDestroy {
 
   constructor(
     public productService: ProductService,
-    public cartService: CartService
+    public cartService: CartService,
+    public apiService: ApiService
   ) {}
 
   ngOnInit(): void {
     this.subscription.add(
       this.productService.getProducts().subscribe((products) => {
         this.products = products;
+        for (const product of products) {
+          this.apiService.recordVariantVisit(product.id);
+        }
       }),
     );
     this.subscription.add(
