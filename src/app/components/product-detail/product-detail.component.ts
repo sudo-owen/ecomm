@@ -8,6 +8,7 @@ import { CartService } from '../../services/cart.service';
 import { FormsModule } from '@angular/forms';
 import { NgFor, NgIf } from '@angular/common';
 import { ABTestService } from '../../services/ab-test.service';
+import { ApiService } from '../../services/api.service';
 
 @Component({
   selector: 'app-product-detail',
@@ -29,7 +30,8 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
     private router: Router,
     private productService: ProductService,
     private cartService: CartService,
-    private abTestService: ABTestService
+    private abTestService: ABTestService,
+    private api: ApiService
   ) {}
 
   ngOnInit(): void {
@@ -49,6 +51,17 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
           }
         }),
     );
+    // Record a visit
+    if (this.api.sessionIdSet.value) {
+      this.api.recordVariantVisit(this.product.id.toString());
+    }
+    else {
+      this.api.sessionIdSet.subscribe(sessionIdSet => {
+        if (sessionIdSet) {
+          this.api.recordVariantVisit(this.product.id.toString());
+        }
+      });
+    }
   }
 
   ngOnDestroy(): void {

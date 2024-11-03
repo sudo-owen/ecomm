@@ -66,17 +66,22 @@ export class ApiService {
     return this.http.get(`${this.apiUrl}/ab-test-results`);
   }
 
-  async recordVariantVisit(): Promise<void> {
-    if (this.hasVisitSent) {
+  hasVisited: Set<string>  = new Set();
+
+  async recordVariantVisit(variantId: string): Promise<void> {
+    if (this.hasVisited.has(variantId)) {
       return;
     }
-    this.hasVisitSent = true;
+    this.hasVisited.add(variantId);
     try {
-      const response = await fetch(`${this.apiUrl}/variant/${this.sessionId}/visit`, {
+      const response = await fetch(`${this.apiUrl}/variant/${variantId}/visit`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
+        body: JSON.stringify({
+          'sessionId': this.getSessionId(),
+        })
       });
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -87,13 +92,16 @@ export class ApiService {
     }
   }
 
-  async recordVariantConversion(): Promise<void> {
+  async recordVariantConversion(variantId: string): Promise<void> {
     try {
-      const response = await fetch(`${this.apiUrl}/variant/${this.sessionId}/conversion`, {
+      const response = await fetch(`${this.apiUrl}/variant/${variantId}/conversion`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
+        body: JSON.stringify({
+          'sessionId': this.getSessionId(),
+        }),
       });
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);

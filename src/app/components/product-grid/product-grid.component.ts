@@ -6,7 +6,6 @@ import { Subscription } from 'rxjs';
 import { Product } from '../../models/interfaces';
 import { CartService } from '../../services/cart.service';
 import { ProductService } from '../../services/product.service';
-import { ApiService } from '../../services/api.service';
 
 @Component({
   selector: 'app-product-grid',
@@ -21,8 +20,7 @@ export class ProductGridComponent implements OnInit, OnDestroy {
 
   constructor(
     public productService: ProductService,
-    public cartService: CartService,
-    private api: ApiService
+    public cartService: CartService
   ) {}
 
   ngOnInit(): void {
@@ -38,9 +36,6 @@ export class ProductGridComponent implements OnInit, OnDestroy {
           this.productService.restockProduct(productId, quantity);
         }),
     );
-
-    // Record we visited
-    this.api.recordVariantVisit();
   }
 
   ngOnDestroy(): void {
