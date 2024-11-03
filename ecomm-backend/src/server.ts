@@ -162,23 +162,33 @@ async function populateDatabaseFromFile() {
   
   if (productCount === 0) {
     console.log('Products table is empty. Loading data from JSON file...')
+    for (const product of products) {
+      await prisma.product.create({
+        data: {
+          name: product.name,
+          price: product.price,
+          description: product.description,
+          imageUrl: product.imageUrl,
+          stock: product.stock,
+          category: product.category,
+          fullDescription: product.fullDescription
+        }
+      });
+    }
   } else {
     console.log('Products table is not empty. Skipping JSON import.')
-    return;
   }
 
-  for (const product of products) {
-    await prisma.product.create({
-      data: {
-        name: product.name,
-        price: product.price,
-        description: product.description,
-        imageUrl: product.imageUrl,
-        stock: product.stock,
-        category: product.category,
-        fullDescription: product.fullDescription
-      }
-    });
+  for (const product of await prisma.product.findMany()) {
+    createProductABTest({
+      productId: product.id,
+      type: 'description'
+    }, false, null);
+
+    createProductABTest({
+      productId: product.id,
+      type: 'image'
+    }, false, null);
   }
 }
 
@@ -381,7 +391,7 @@ async function generateABTest(config, abTest) {
   }
 }
 
-async function updateProductAbTest(enabled: boolean, config: Prisma.AbConfig, res: Response) {
+async function updateProductAbTest(enabled: boolean, config: Prisma.ProductAbConfig, res: Response) {
   if (enabled) {
     let abTest = await prisma.abTest.findFirst({
       where: {
@@ -414,17 +424,21 @@ async function updateProductAbTest(enabled: boolean, config: Prisma.AbConfig, re
           }
         }
       });
-      res.status(202).json({
-        abTest: abTest,
-        message: 'A/B test enabled'
-      });
+      if (res) {
+        res.status(202).json({
+          abTest: abTest,
+          message: 'A/B test enabled'
+        });
+      }
 
       const newAbTest = await generateABTest(config, abTest);
     } else {
-      res.status(200).json({
-        abTest: abTest,
-        message: 'A/B test already exists'
-      });
+      if (res) {
+        res.status(200).json({
+          abTest: abTest,
+          message: 'A/B test already exists'
+        });
+      }
     }
 
 
@@ -443,7 +457,9 @@ async function updateProductAbTest(enabled: boolean, config: Prisma.AbConfig, re
       }
     });
 
-    res.status(200).json({ message: 'A/B test disabled' });
+    if (res) {
+      res.status(200).json({ message: 'A/B test disabled' });
+    }
   }
 }
 
@@ -466,6 +482,42 @@ app.get('/api/ab-test-configs', catchErrorsDecorator(
   }
 ));
 
+async function createProductABTest(info, enabled, res) {
+  let config = null;
+  try {
+    config = await prisma.productAbConfig.create({
+      data: {
+        enabled: enabled,
+        product: {
+          connect: {
+            id: info.productId
+          }
+        },
+        type: info.type,
+      },
+      include: {
+        product: true
+      }
+    });
+  } catch (error) {
+    if (res) {
+      res.status(400).json({ message: 'Config with this product and type already exists' })
+    }
+    return;
+  }
+
+  if (config) {
+    updateProductAbTest(enabled, config, res);
+    if (res) {
+      res.status(201).json(config);
+    }
+  } else {
+    if (res) {
+      res.status(500).json({ message: 'Error creating A/B test' })
+    };
+  }
+}
+
 app.post('/api/ab-test-configs/:type', catchErrorsDecorator(
   async (req: Request, res: Response) => {
   const { info, enabled } = req.body;
@@ -476,29 +528,18 @@ app.post('/api/ab-test-configs/:type', catchErrorsDecorator(
   }
 
   if (type === 'product') {
-    const config = await prisma.productAbConfig.create({
-      data: {
-        enabled: enabled,
-        product: {
-          connect: { 
-            id: info.productId
-          }
-        },
-        type: info.type,
-      },
-      include: {
-        product: true
-      }
-    });
-    if (config) {
-      updateProductAbTest(enabled, config, res);
-    } else {
-      res.status(500).json({ message: 'Error creating A/B test' });
-    }
+    createProductABTest(info, enabled, res);
   } else {
     res.status(400).json({ message: 'Unsupported config type' });
   }
 }));
+
+app.get('/api/ab-test', catchErrorsDecorator(
+  async (req: Request, res: Response) => {
+    const abTests = await prisma.abTest.findMany();
+    res.status(200).json(abTests);
+  }
+));
 
 app.put('/api/ab-test-configs/:type/:id', catchErrorsDecorator(
   async (req: Request, res: Response) => {

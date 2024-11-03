@@ -44,6 +44,8 @@ model ProductAbConfig {
 
   product     Product @relation(fields: [productId], references: [id])
   abTests     AbTest[]
+
+  @@unique([productId, type])
 }
 
 model AbTest {
