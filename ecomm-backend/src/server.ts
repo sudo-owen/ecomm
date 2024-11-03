@@ -5,7 +5,6 @@ import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { PrismaClient, Prisma } from '@prisma/client'
 import { generateProductVariations, getProductImageVariations, generateProductImage, generateThemeVariations } from '../llm/ai_variation_engine';
-import * as crypto from 'crypto';
 import cors from "cors";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -33,6 +32,13 @@ interface ProductVariant {
   changes: Record<string, string>;
 }
 
+interface ThemeVariant {
+  id: number;
+  themeId: "heroSection" | "featureCard" | "testimonialCard" | "productCard" | "productHolder";
+  changes: object;
+}
+
+
 interface ABTest {
   id: number,
   product: Product,
@@ -43,19 +49,10 @@ interface ABTest {
   result?: ABTestResult 
 }
 
-interface ABTestReponse {
-  id: number,
-  product: Product,
-  name: string,
-  description: string,
-  variant: ProductVariant[],
-  result?: ABTestResult 
-}
-
 
 interface ABTestResult {
   productId: number;
-  variationType: 'description' | 'image';
+  variationType: 'description' | 'image' | 'theme';
   variationIndex: number;
   purchases: number;
 }
@@ -133,17 +130,20 @@ const THEME_FILE = join(__dirname, 'public', 'data', 'themes.json');
 const PRODUCT_VARIANTS_FILE = join(__dirname, 'public', 'data', 'product_variants.json');
 const AB_TESTS_FILE = join(__dirname, 'public', 'data', 'ab_tests.json');
 const IMAGES_FOLDER = join(__dirname, 'public', 'img');
+const THEME_VARIANTS_FILE = join(__dirname, 'public', 'data', 'theme_variants.json');
 
 let products: Product[] = [];
 let abTests: ABTest[] = [];
 let theme: AppTheme | undefined = undefined;
-const abTestResults: ABTestResult[] = [];
 
 let productVariantMetadata = {
   id: 0
 };
 let productVariants: ProductVariant[] = [];
-
+let themeVariants: ThemeVariant[] = [];
+let themeVariantMetadata = {
+  id: 0
+};
 
 async function loadProducts() {
   try {
@@ -210,6 +210,17 @@ async function loadProductVariants() {
   }
 }
 
+async function loadThemeVariants() {
+  try {
+    const themeVariantData = await readFile(THEME_VARIANTS_FILE, 'utf-8');
+    const parsedData = JSON.parse(themeVariantData);
+    themeVariantMetadata = parsedData.metadata;
+    themeVariants = parsedData.data;
+  } catch (error) {
+    await saveThemeVariants();
+  }
+}
+
 async function loadABTests() {
   try {
     const abTestsData = await readFile(AB_TESTS_FILE, 'utf-8');
@@ -227,6 +238,13 @@ async function saveProductVariants() {
   }, null, 2));
 }
 
+async function saveThemeVariants() {
+  await writeFile(THEME_VARIANTS_FILE, JSON.stringify({
+    metadata: themeVariantMetadata,
+    data: themeVariants
+  }, null, 2));
+}
+
 async function saveProducts() {
   await writeFile(
     PRODUCT_FILE,
@@ -239,12 +257,7 @@ async function saveABTests() {
   await writeFile(abTestsPath, JSON.stringify(abTests, null, 2));
 }
 
-async function saveABTestResults() {
-  const resultsPath = join(__dirname, 'public', 'data', 'ab_test_results.json');
-  await writeFile(resultsPath, JSON.stringify(abTestResults, null, 2));
-}
-
-async function generateVariants(product: Product) {
+async function generateProductVariants(product: Product) {
     const descriptionVariant = await generateProductVariations(product.fullDescription);
     const imagePromptVariant = await getProductImageVariations(product.fullDescription);
     const newVariants: ProductVariant[] = [];
@@ -277,6 +290,23 @@ async function generateVariants(product: Product) {
 
     console.log("newVariants: " + JSON.stringify(newVariants, null, 2));
     return newVariants;
+}
+
+async function generateThemeVariants(theme: AppTheme, component: keyof AppTheme): Promise<ThemeVariant[]> {
+  const newVariants: ThemeVariant[] = [];
+
+  const componentVariations = await generateThemeVariations(component, theme[component]);
+  
+  const newVariant: ThemeVariant = {
+      id: themeVariantMetadata.id++,
+      themeId: component,
+      changes: componentVariations
+  };
+  newVariants.push(newVariant);
+
+
+  console.log(`newThemeVariants for ${component}: ${JSON.stringify(newVariants, null, 2)}`);
+  return newVariants;
 }
 
 app.use((req: Request, res: Response, next: () => void) => {
@@ -499,11 +529,29 @@ function variantToDatabaseVariant(variant: ProductVariant, abTestId: number) {
   return databaseVariant;
 }
 
-async function generateABTest(config, abTest) {
+function themeVariantToDatabaseVariant(variant: ThemeVariant, abTestId: number) {
+  let databaseVariant: any = {};
+  databaseVariant.changes = JSON.stringify(variant.changes);
+  databaseVariant.theme = {
+    connect: {
+      id: variant.themeId
+    }
+  };
+  return databaseVariant;
+}
+
+async function generateABTest(config: { product: Product; theme: keyof AppTheme; }, abTest: { id: number; }) {
   try {
-    const variants: ProductVariant[] = await generateVariants(config.product);
+    const variants: ProductVariant[] = await generateProductVariants(config.product);
+    let themes: ThemeVariant[] = [];
+    if (theme)
+      themes = await generateThemeVariants(theme, config.theme);
+
     const databaseVariants = variants.map(
       v => variantToDatabaseVariant(v, abTest.id)
+    );
+    const themeVariants = themes.map(
+      v => themeVariantToDatabaseVariant(v, abTest.id)
     );
 
     // TODO: name and description
@@ -514,6 +562,9 @@ async function generateABTest(config, abTest) {
       data: {
         variants: {
           create: databaseVariants
+        },
+        themeVariants: {
+          create: themeVariants
         },
         status: 'ongoing'
       }
@@ -578,7 +629,7 @@ async function updateProductAbTest(enabled: boolean, config: Prisma.ProductAbCon
         });
       }
 
-      const newAbTest = await generateABTest(config, abTest);
+      await generateABTest(config, abTest);
     } else {
       if (res) {
         res.status(200).json({
@@ -764,136 +815,17 @@ app.put('/api/variant/:id/conversion', catchErrorsDecorator(
   }
 ));
 
-// ---------------------------------------------------------
-
-
-// Deprecated: 
-app.post('/api/create-ab-test', async (req: Request, res: Response) => {
-  const { productId, name, description } = req.body;
-
-  if (!productId || !name || !description) {
-    return res.status(400).json({ message: 'Missing required fields' });
-  }
-
-  let product = products.find(p => p.id === productId);
-  if (!product) {
-    return res.status(404).json({ message: 'Product not found' });
-  }
-
-  const generatedVariants = await generateVariants(product);
-  if (!generatedVariants) {
-    return res.status(404).json({ message: 'Product not found' });
-  }
-
-  const newABTest: ABTest = {
-    id: 0,
-    product: product,
-    productId: productId,
-    name: name,
-    description: description,
-    variantIds: generatedVariants.map(v => v.id)
-  }
-
-  abTests.push(newABTest);
-
-  saveProductVariants();
-  saveABTests();
-
-  res.json({ message: 'A/B test created successfully' });
-});
-
-app.post('/api/ab-test-result', (req: Request, res: Response) => {
-  const { productId, variationType, variationIndex } = req.body;
-
-  let result = abTestResults.find(r => 
-    r.productId === productId && 
-    r.variationType === variationType && 
-    r.variationIndex === variationIndex
-  );
-
-  if (!result) {
-    result = { productId, variationType, variationIndex, purchases: 0 };
-    abTestResults.push(result);
-  }
-
-  result.purchases++;
-  saveABTestResults();
-  res.json({ message: 'A/B test result recorded' });
-});
-
-
-app.get('/api/ab-test/:id', (req: Request, res: Response) => {
-  const id: number = parseInt(req.params.id);
-
-  const abTest = abTests.find(t => t.id === id);
-  if (!abTest) {
-    return res.status(404).json({ message: 'A/B test not found' });
-  }
-  const abTestResponse: any = {...abTest};
-  delete abTestResponse.variantIds;
-
-  abTestResponse.variants = abTest.variantIds.map(id => productVariants.find(v => v.id === id));
-
-  res.json(abTestResponse);
-});
-
-
-app.get('/api/ab-test-results', (req: any, res: { json: (arg0: ABTestResult[]) => void; }) => {
-  res.json(abTestResults);
-});
-// Add the new endpoint for generating theme variations
-app.post('/api/generate-theme-variations', async (req: Request, res: Response) => {
-  try {
-    const { elementName, themeParams } = req.body;
-
-    if (!elementName || !themeParams) {
-      return res.status(400).json({ message: 'Missing required fields' });
-    }
-
-    const variations = await generateThemeVariations(elementName, themeParams);
-
-    res.json({ variations });
-  } catch (error) {
-    console.error('Error generating theme variations:', error);
-    res.status(500).json({ message: 'Error generating theme variations' });
-  }
-});
-
 // Getter for themes
 app.get('/api/themes', (_req: any, res: { json: (arg0: AppTheme) => void; }) => {
   res.json(theme!);
 });
 
-// Add the new endpoint for generating variations
-app.get('/api/generate-variant/:productId', async (req: Request, res: Response) => {
-  try {
-    const productId = parseInt(req.params.productId);
-
-    const product = products.find(p => p.id === productId);
-    if (!product) {
-      return res.status(404).json({ message: 'Product not found' });
-    }
-
-    const generatedVariants = await generateVariants(product);
-    if (!generatedVariants) {
-      return res.status(404).json({ message: 'Product not found' });
-    }
-    productVariants.push(...generatedVariants);
-
-    // Save the updated products
-    saveProductVariants();
-
-    res.json({ message: 'Variants generated successfully'});
-  } catch (error) {
-    console.error('Error generating variants:', error);
-    res.status(500).json({ message: 'Error generating variants' });
-  }
-});
 
 async function startServer() {
   await loadProducts();
   await loadProductVariants();
   await loadThemes();
+  await loadThemeVariants();
   await loadABTests();
 
   await populateDatabaseFromFile();

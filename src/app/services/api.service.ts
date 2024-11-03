@@ -30,10 +30,6 @@ export class ApiService {
     return this.http.get<AppTheme>(`${this.apiUrl}/themes`);
   }
 
-  generateVariations(productId: number): Observable<Product> {
-    return this.http.get<Product>(`${this.apiUrl}/generate-variations/${productId}`);
-  }
-
   recordABTestResult(productId: number, variationType: 'descriptions' | 'imageUrls', variationIndex: number): Observable<any> {
     return this.http.post(`${this.apiUrl}/ab-test-result`, { productId, variationType, variationIndex });
   }
