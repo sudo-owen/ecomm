@@ -176,8 +176,12 @@ async function generateProductVariations(productDescription: string): Promise<st
   }
 
   // Parse the JSON string
-  const variations: string[] = Object.values(JSON.parse(jsonString));
-  return variations;
+  try {
+    const variations: string[] = Object.values(JSON.parse(jsonString));
+    return variations;
+  } catch (error) {
+    throw new Error("Failed to parse JSON from the response response: " + jsonString + error);
+  }
 }
 
 async function getProductImageVariations(productDescription: string): Promise<string[]> {
@@ -240,12 +244,13 @@ async function generateProductImage(description: string, saveFolder: string): Pr
       // Download the image
       const imageResponse = await axios.get(imageUrl, { responseType: 'arraybuffer' });
       await fs.writeFile(imagePath, imageResponse.data);
-  
-      console.log(`Image saved to: ${imagePath}`);
-  
-      // Return the relative path to be used in your application
-      const publicPath = path.join('public');
-      const relativePath = path.relative(publicPath, imagePath);
+    
+      // Return the path starting from /public
+      const publicIndex = imagePath.indexOf('public');
+      if (publicIndex === -1) {
+        throw new Error("Unable to find 'public' in the image path");
+      }
+      const relativePath = imagePath.slice(publicIndex);
       return `/${relativePath.replace(/\\/g, '/')}`;
     } catch (error) {
       console.error(`Failed to generate or save image for ${description}:`, error);
