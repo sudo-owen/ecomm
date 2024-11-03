@@ -5,6 +5,7 @@ import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { PrismaClient, Prisma } from '@prisma/client'
 import { generateProductVariations, getProductImageVariations, generateProductImage, generateThemeVariations } from '../llm/ai_variation_engine';
+import cors from "cors";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -123,6 +124,7 @@ interface AppTheme {
 
 
 app.use(express.json());
+app.use(cors());
 app.use('/public', express.static(join(__dirname, 'public')));
 
 const PRODUCT_FILE = join(__dirname, 'public', 'data', 'products.json');
