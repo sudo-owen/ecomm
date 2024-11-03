@@ -18,7 +18,6 @@ export class ThemeService {
   }
 
   init() {
-    this.currentTheme$ = this.api.getTheme();
     return this.api.getTheme().pipe(
       map((x) => {
         this.currentTheme.next(x);
