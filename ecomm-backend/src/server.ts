@@ -122,7 +122,6 @@ interface AppTheme {
 }
 
 
-app.use(cors());
 app.use(express.json());
 app.use('/public', express.static(join(__dirname, 'public')));
 
