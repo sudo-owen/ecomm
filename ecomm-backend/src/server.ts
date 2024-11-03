@@ -275,7 +275,7 @@ async function generateVariants(product: Product) {
 
     newVariants.push(...imageVariants);
 
-    console.log("newVariants: " + JSON.stringify(newVariants, null, 2));
+    // console.log("newVariants: " + JSON.stringify(newVariants, null, 2));
     return newVariants;
 }
 
@@ -362,7 +362,7 @@ async function getProductWithVariant(product: Product, session_id: string) {
   });
 
   if (variant) {
-    console.log(`Variant(${variant.id}) for product(${product.id}) session(${session_id})`);
+    // console.log(`Variant(${variant.id}) for product(${product.id}) session(${session_id})`);
     
     const changes = JSON.parse(variant.changes);
     //console.log(`Changes (${product.id}): `, changes);
@@ -382,7 +382,7 @@ async function getProductWithVariant(product: Product, session_id: string) {
         id: 'asc'
       }
     });
-    console.log('Variants: ', variants);
+    // console.log('Variants: ', variants);
 
     let random = Math.random();
 
@@ -628,7 +628,9 @@ function catchErrorsDecorator(func: any) {
 // API for dashboard ---------------------------------------
 app.get('/api/ab-test-configs', catchErrorsDecorator(
   async (req: Request, res: Response) => {
-  const configs = await prisma.productAbConfig.findMany();
+  const configs = await prisma.productAbConfig.findMany(
+    {include: {product: true}}
+  );
   res.status(200).json(configs);
   }
 ));

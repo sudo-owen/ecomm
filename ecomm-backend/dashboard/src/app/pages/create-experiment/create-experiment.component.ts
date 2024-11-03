@@ -10,7 +10,7 @@ import {
   SelectedElement,
 } from '../../models/selected-element.interface';
 import { IframeCommunicationService } from '../../services/iframe-communication.service';
-import { Product } from '../../services/api.service';
+import { Product, ApiService } from '../../services/api.service';
 
 interface Tab {
   id: string;
@@ -40,7 +40,7 @@ export class CreateExperimentComponent implements OnInit, OnDestroy {
     { id: 'products', label: 'Products' }
   ];
   
-  activeTab: string = 'preview';
+  activeTab: string = 'products';
 
   experimentParams: ExperimentParams = {
     duration: '7',
@@ -49,7 +49,10 @@ export class CreateExperimentComponent implements OnInit, OnDestroy {
     selectedElements: [],
   };
 
-  constructor(private iframeService: IframeCommunicationService) {
+  constructor(
+    private iframeService: IframeCommunicationService,
+    private apiService: ApiService
+  ) {
     this.iframeUrl = this.iframeService.getIframeUrl();
   }
 
@@ -69,6 +72,8 @@ export class CreateExperimentComponent implements OnInit, OnDestroy {
         }
       }),
     );
+
+    this.fetchAndPreSelectActiveConfigs();
   }
 
   ngOnDestroy() {
@@ -80,9 +85,6 @@ export class CreateExperimentComponent implements OnInit, OnDestroy {
     this.iframeService.handleIframeMessage(event);
   }
 
-  onIframeLoad() {
-    this.iframeLoaded = true;
-  }
 
   toggleSelectionMode() {
     this.isSelectionMode = !this.isSelectionMode;
@@ -135,5 +137,42 @@ export class CreateExperimentComponent implements OnInit, OnDestroy {
         location: 'Product',
       });
     });
+  }
+
+
+  fetchAndPreSelectActiveConfigs() {
+    this.apiService.getABTestConfigs().subscribe(
+      (configs) => {
+        const activeConfigs = configs.filter(config => config.enabled);
+        const activeExperiments: SelectedElement[] = [];
+
+        activeConfigs.forEach(config => {
+          const productElement: SelectedElement = {
+            selector: `data-product-${config.productId}`,
+            originalContent: "",
+            location: `${config.product.name}`,
+          };
+          this.experimentParams.selectedElements.push(productElement);
+          activeExperiments.push(productElement);
+          
+          // Pre-select the product in the ProductListComponent
+          const product = this.productListComponent.productsSubject.value.find(p => p.id === config.productId);
+          if (product) {
+            this.productListComponent.toggleProduct(product);
+          }
+        });
+
+        
+      },
+      (error) => {
+        console.error('Error fetching AB test configs:', error);
+      }
+    );
+  }
+  
+  onIframeLoad() {
+    this.iframeLoaded = true;
+    // When the iframe is loaded, update it with the active experiments
+    this.iframeService.updateIframeWithActiveExperiments(this.experimentParams.selectedElements);
   }
 }
