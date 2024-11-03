@@ -3,12 +3,8 @@ import type { Request, Response } from "express";
 import { readFile, writeFile } from "fs/promises";
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
-<<<<<<< HEAD
-import { generateProductVariations, getProductImageVariations, generateProductImage } from '../llm/ai_variation_engine';
 import { PrismaClient, Prisma } from '@prisma/client'
-=======
 import { generateProductVariations, getProductImageVariations, generateProductImage, generateThemeVariations } from '../llm/ai_variation_engine';
->>>>>>> main
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -45,7 +41,6 @@ interface ABTest {
   result?: ABTestResult 
 }
 
-<<<<<<< HEAD
 interface ABTestReponse {
   id: number,
   product: Product,
@@ -55,17 +50,13 @@ interface ABTestReponse {
   result?: ABTestResult 
 }
 
-=======
->>>>>>> main
+
 interface ABTestResult {
   productId: number;
   variationType: 'description' | 'image';
   variationIndex: number;
   purchases: number;
 }
-<<<<<<< HEAD
-app.use(express.json())
-=======
 
 // Base export interface for common styles
 export interface BaseStyles {
@@ -133,7 +124,6 @@ interface AppTheme {
 
 app.use(cors());
 app.use(express.json());
->>>>>>> main
 app.use('/public', express.static(join(__dirname, 'public')));
 
 const PRODUCT_FILE = join(__dirname, 'public', 'data', 'products.json');
@@ -163,7 +153,6 @@ async function loadProducts() {
   }
 }
 
-<<<<<<< HEAD
 async function populateDatabaseFromFile() {
   // Populate products table using products.json
   // checks if empty first
@@ -191,13 +180,15 @@ async function populateDatabaseFromFile() {
         fullDescription: product.fullDescription
       }
     });
-=======
+  }
+}
+
 async function loadThemes() {
   try {
     const themeData = await readFile(THEME_FILE, 'utf-8');
     theme = JSON.parse(themeData);
   } catch (error) {
->>>>>>> main
+    theme = undefined;
   }
 }
 
@@ -671,28 +662,16 @@ app.get('/api/generate-variant/:productId', async (req: Request, res: Response) 
 });
 
 async function startServer() {
-<<<<<<< HEAD
   await loadProducts();
   await loadProductVariants();
+  await loadThemes();
   await loadABTests();
 
   await populateDatabaseFromFile();
   app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
   });
-=======
-  try {
-    await loadProducts();
-    await loadProductVariants();
-    await loadABTests();
-    await loadThemes();
-    app.listen(port, () => {
-      console.log(`Server is running on http://localhost:${port}`);
-    });
-  } catch (error) {
-    console.error('Error starting server:', error);
-  }
->>>>>>> main
 }
 
 startServer().catch(error => console.error('Unhandled error:', error));
+
