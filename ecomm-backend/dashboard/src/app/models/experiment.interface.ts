@@ -5,6 +5,8 @@ interface Variant {
 }
 
 export interface ExperimentWithProduct extends Experiment {
+  defaultVisits: number;
+  defaultConversions: number;
   product: any;
 }
 

@@ -62,4 +62,14 @@ export class ExperimentDetailComponent implements OnInit {
     
     return bestRate.toFixed(2);
   }
+
+  getTotalImpressions(): number {
+    return this.experimentData.defaultVisits + this.experimentData.variants.reduce((total, variant) => total + variant.visits, 0);
+  }
+
+  getTotalConversions(): number {
+    return  this.experimentData.defaultConversions + this.experimentData.variants.reduce((total, variant) => total + variant.conversions, 0);
+  }
 }
+
+

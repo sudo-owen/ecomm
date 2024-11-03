@@ -39,7 +39,7 @@ export class HomeComponent implements OnInit {
             experiment.product = JSON.parse(experiment.productBlob);
             const totalVisits = experiment.variants.reduce((sum: number, variant: any) => sum + variant.visits, 0);
             const totalConversions = experiment.variants.reduce((sum: number, variant: any) => sum + variant.conversions, 0);
-            experiment.progress = Math.min(Math.floor((totalVisits / 100) * 100), 100);
+            experiment.progress = Math.min(Math.floor((totalVisits / 175) * 100), 300);
             experiment.impressions = totalVisits;
             experiment.conversions = totalConversions;
           });
@@ -102,5 +102,12 @@ export class HomeComponent implements OnInit {
     return Math.max(...experiment.variants.map(variant => 
       variant.visits > 0 ? (variant.conversions / variant.visits) * 100 : 0
     ));
+  }
+
+  getDefaultConversionRate(experiment: ExperimentWithProgress): number {
+    if (experiment.impressions > 0 ) {
+      return (experiment.conversions / experiment.impressions) * 100;
+    }
+    return 0;
   }
 }

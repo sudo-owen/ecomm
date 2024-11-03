@@ -27,7 +27,7 @@
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
       <h3 class="text-sm font-medium text-gray-500">Overall Conversion Rate</h3>
       <div class="text-3xl font-bold mt-2">
-        {{ overallMetrics.overallConversionRate }}%
+        {{ overallMetrics.overallConversionRate | number:'1.2-2' }}%
       </div>
     </div>
   </div>
@@ -52,7 +52,7 @@
           <div class="space-y-2">
             <div class="flex justify-between text-sm">
               <span class="text-gray-600">Progress</span>
-              <span class="font-medium">{{ experiment.progress }}%</span>
+              <span class="font-medium">{{ experiment.progress | number:'1.0-0' }}%</span>
             </div>
             <div class="w-full bg-gray-100 rounded-full h-2.5">
               <div
@@ -73,11 +73,29 @@
             </div>
             <div class="flex justify-between text-sm">
               <span class="text-gray-600">Avg. Conversion Rate</span>
-              <span class="font-medium">{{ getAverageConversionRate(experiment) | number:'1.2-2' }}%</span>
+              <span class="font-medium" [ngClass]="{
+                'text-green-600': getAverageConversionRate(experiment) > getDefaultConversionRate(experiment),
+                'text-red-600': getAverageConversionRate(experiment) < getDefaultConversionRate(experiment),
+                'text-gray-600': getAverageConversionRate(experiment) === getDefaultConversionRate(experiment)
+              }">
+                {{ getAverageConversionRate(experiment) | number:'1.2-2' }}%
+              </span>
             </div>
             <div class="flex justify-between text-sm">
               <span class="text-gray-600">Best Conversion Rate</span>
-              <span class="font-medium">{{ getBestConversionRate(experiment) | number:'1.2-2' }}%</span>
+              <span class="font-medium" [ngClass]="{
+                'text-green-600': getBestConversionRate(experiment) > getDefaultConversionRate(experiment),
+                'text-red-600': getBestConversionRate(experiment) < getDefaultConversionRate(experiment),
+                'text-gray-600': getBestConversionRate(experiment) === getDefaultConversionRate(experiment)
+              }">
+                {{ getBestConversionRate(experiment) | number:'1.2-2' }}%
+              </span>
+            </div>
+            <div class="flex justify-between text-sm">
+              <span class="text-gray-600">Default Conversion Rate</span>
+              <span class="font-medium">
+                {{ getDefaultConversionRate(experiment) | number:'1.2-2' }}%
+              </span>
             </div>
           </div>
         </div>
