@@ -228,7 +228,7 @@ async function generateProductImage(description: string, saveFolder: string): Pr
         model: "dall-e-3",
         prompt: `A product image of ${description}`,
         n: 1,
-        size: "512x512",
+        size: "1024x1024",
       });
       if (!response.data || response.data.length === 0 || !response.data[0].url) {
         throw new Error("No data in the response");

@@ -125,7 +125,9 @@ interface AppTheme {
 
 
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+  exposedHeaders: ['X-Ddd-Session-Id']
+}));
 app.use('/public', express.static(join(__dirname, 'public')));
 
 const PRODUCT_FILE = join(__dirname, 'public', 'data', 'products.json');
@@ -753,40 +755,150 @@ app.get('/api/ab-test/:id', catchErrorsDecorator(
   }
 ));
 
-
-app.put('/api/variant/:id/visit', catchErrorsDecorator(
+app.put('/api/ab-tests/:id', catchErrorsDecorator(
   async (req: Request, res: Response) => {
-    const variantId = parseInt(req.params.id);
-    if (!variantId) {
-      return res.status(400).json({ message: 'Invalid variant id' });
+    const id = parseInt(req.params.id);
+    if (!id) {
+      return res.status(400).json({ message: 'Invalid ab test id' });
     }
 
-    await prisma.productVariant.update({
-      where: { id: variantId },
-      data: {
-        visits: {
-          increment: 1
-        }
-      }
-    });
+    const updateData = req.body.data;
+    try {
+      const abTest = await prisma.abTest.update({
+        where: { id: id },
+        data: updateData
+      });
+    } catch (error) {
+      console.error('Error updating A/B test:', error);
+      res.status(400).json({ message: 'Error updating A/B test' });
+    }
   }
 ));
 
-app.put('/api/variant/:id/conversion', catchErrorsDecorator(
+
+
+app.put('/api/variant/visit', catchErrorsDecorator(
   async (req: Request, res: Response) => {
-    const variantId = parseInt(req.params.id);
-    if (!variantId) {
-      return res.status(400).json({ message: 'Invalid variant id' });
+
+    const { productId, sessionId } = req.body;
+    if (!productId || !sessionId) {
+      return res.status(400).json({ message: 'Invalid variant' });
     }
 
-    await prisma.productVariant.update({
-      where: { id: variantId },
-      data: {
-        conversions: {
-          increment: 1
+    const variant = await prisma.productVariant.findFirst({
+      where: { 
+        productId: productId,
+        sessions: {
+          some: {
+            id: sessionId
+          }
+        },
+        abTest: {
+          status: 'ongoing'
         }
       }
     });
+
+
+    if (!variant) {
+      const abTest = await prisma.abTest.findFirst({
+        where: {
+          abConfig: {
+            productId: productId,
+          },
+          status: 'ongoing'
+        }
+      });
+
+      if (abTest) {
+        await prisma.abTest.update({
+          where: {
+            id: abTest.id
+          },
+          data: {
+            defaultVisits: {
+              increment: 1
+            }
+          }
+        })
+      }
+    } else {
+
+      await prisma.productVariant.update({
+        where: { 
+          id: variant.id
+        },
+        data: {
+          visits: {
+            increment: 1
+          }
+        }
+      });
+    }
+
+
+  }
+));
+
+app.put('/api/variant/conversion', catchErrorsDecorator(
+  async (req: Request, res: Response) => {
+    const { productId, sessionId } = req.body;
+    if (!productId || !sessionId) {
+      return res.status(400).json({ message: 'Invalid variant' });
+    }
+
+    const variant = await prisma.productVariant.findFirst({
+      where: { 
+        productId: productId,
+        sessions: {
+          some: {
+            id: sessionId
+          }
+        },
+        abTest: {
+          status: 'ongoing'
+        }
+      }
+    });
+
+
+    if (!variant) {
+      console.log("Conversion for default variant");
+      const abTest = await prisma.abTest.findFirst({
+        where: {
+          abConfig: {
+            productId: productId,
+          },
+          status: 'ongoing'
+        }
+      });
+
+      if (abTest) {
+        await prisma.abTest.update({
+          where: {
+            id: abTest.id
+          },
+          data: {
+            defaultConversions: {
+              increment: 1
+            }
+          }
+        })
+      }
+    } else {
+      console.log("Conversion for variant: " + variant.id)
+
+      await prisma.productVariant.update({
+        where: { 
+          id: variant.id
+        },
+        data: {
+          conversions: {
+            increment: 1
+          }
+        }
+      });
+    }
   }
 ));
 

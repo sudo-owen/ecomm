@@ -8,7 +8,6 @@ import { ApiService } from './api.service';
   providedIn: 'root'
 })
 export class ThemeService {
-
   currentTheme: BehaviorSubject<AppTheme>;
   currentTheme$: Observable<AppTheme>;
 
@@ -19,12 +18,15 @@ export class ThemeService {
 
   init() {
     return this.api.getTheme().pipe(
-      map((x) => {
-        this.currentTheme.next(x);
+      map((theme) => {
+        this.currentTheme.next(theme);
         return true;
-      }), // Convert successful response to true
-      catchError(() => of(false)) // Convert error to false
+      }),
+      catchError(() => of(false))
     );
   }
 
+  getSessionId(): string | null {
+    return this.api.getSessionId();
+  }
 }

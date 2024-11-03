@@ -20,7 +20,7 @@ export class ProductGridComponent implements OnInit, OnDestroy {
 
   constructor(
     public productService: ProductService,
-    public cartService: CartService,
+    public cartService: CartService
   ) {}
 
   ngOnInit(): void {
