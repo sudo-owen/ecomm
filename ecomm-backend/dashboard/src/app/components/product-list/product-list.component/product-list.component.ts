@@ -1,8 +1,9 @@
 // product-list.component.ts
-import { Component, EventEmitter, inject, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, inject, Input, OnInit, Output, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ApiService, Product } from '../../../services/api.service';
-import { Observable, map } from 'rxjs';
+import { BehaviorSubject, Observable, map } from 'rxjs';
+import { LucideAngularModule } from 'lucide-angular';
 
 interface ProductWithSelection extends Product {
   selected: boolean;
@@ -11,7 +12,7 @@ interface ProductWithSelection extends Product {
 @Component({
   selector: 'app-product-list',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, LucideAngularModule],
   template: `
     @if (loading$ | async) {
       <div class="flex justify-center p-4">
@@ -42,24 +43,19 @@ interface ProductWithSelection extends Product {
             class="flex items-center p-4 border rounded-lg hover:shadow-lg transition-shadow cursor-pointer"
             [class.bg-blue-50]="product.selected"
             (click)=toggleProduct(product)
+            [ngClass]="{
+              'bg-blue-50': product.selected,
+              'bg-white': !product.selected
+            }"
           >
             <div class="flex-grow">
               <!-- Image -->
-              <img [src]="product.imageUrl" [alt]="product.name" class="w-20 h-20 object-cover rounded">
               <h3 class="text-lg font-semibold">
                 {{ product.name }}
               </h3>
               <p class="text-gray-600">
                 {{ product.description }}
               </p>
-            </div>
-            <div class="flex-shrink-0">
-              <input
-                type="checkbox"
-                [checked]="product.selected"
-                (change)="toggleProduct(product)"
-                class="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
-              >
             </div>
           </div>
         }
@@ -75,65 +71,54 @@ interface ProductWithSelection extends Product {
 export class ProductListComponent implements OnInit {
   private apiService = inject(ApiService);
   
-  products$!: Observable<ProductWithSelection[]>;
-  allProducts: Product[] = [];
+  public productsSubject = new BehaviorSubject<ProductWithSelection[]>([]);
+  products$: Observable<ProductWithSelection[]> = this.productsSubject.asObservable();
   loading$ = this.apiService.loading$;
   error$ = this.apiService.error$;
-  
   selectedCount = 0;
   selectedTotal = 0;
   allSelected = false;
-
-  @Output() allSelectedProducts = new EventEmitter<Product[]>();
   selectedProductsAll: Set<Product> = new Set();
 
+  @Input() productsToDeselect: Set<Product> = new Set();
+  @Output() allSelectedProducts = new EventEmitter<Product[]>();
+
   ngOnInit() {
-    this.products$ = this.apiService.getProducts().pipe(
-      map(products => products.map(product => ({
+    this.apiService.getProducts().subscribe(products => {
+      const productsWithSelection = products.map(product => ({
         ...product,
         selected: false
-      })))
-    );
-    // Set allProducts from this.product$
-    this.products$.subscribe(products => this.allProducts = products);
+      }));
+      this.productsSubject.next(productsWithSelection);
+    });
   }
 
-  toggleProduct(product: ProductWithSelection) {
-    product.selected = !product.selected;
-    if (product.selected) {
-      this.selectedProductsAll.add(product);
-    } else {
-      this.selectedProductsAll.delete(product);
-    }
+  public toggleProduct(product: ProductWithSelection) {
+    const updatedProducts = this.productsSubject.value.map(p => 
+      p.id === product.id ? { ...p, selected: !p.selected } : p
+    );
+    this.productsSubject.next(updatedProducts);
     this.updateSelectionStats();
   }
 
   toggleSelectAll() {
     this.allSelected = !this.allSelected;
-    this.products$ = this.products$.pipe(
-      map(products => products.map(product => ({
-        ...product,
-        selected: this.allSelected
-      })))
-    );
-    if (this.allSelected) {
-      this.selectedProductsAll = new Set(this.allProducts);
-    } else {
-      this.selectedProductsAll = new Set();
-    }
+    const updatedProducts = this.productsSubject.value.map(product => ({
+      ...product,
+      selected: this.allSelected
+    }));
+    this.productsSubject.next(updatedProducts);
     this.updateSelectionStats();
   }
 
   private updateSelectionStats() {
-    this.products$.pipe(
-      map(products => {
-        this.selectedCount = products.filter(p => p.selected).length;
-        this.selectedTotal = products
-          .filter(p => p.selected)
-          .reduce((total, p) => total + p.price, 0);
-        this.allSelected = products.length > 0 && products.every(p => p.selected);
-      })
-    ).subscribe();
+    const products = this.productsSubject.value;
+    this.selectedCount = products.filter(p => p.selected).length;
+    this.selectedTotal = products
+      .filter(p => p.selected)
+      .reduce((total, p) => total + p.price, 0);
+    this.allSelected = products.length > 0 && products.every(p => p.selected);    
+    this.selectedProductsAll = new Set(products.filter(p => p.selected));
     this.allSelectedProducts.emit(Array.from(this.selectedProductsAll));
   }
 }

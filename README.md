@@ -35,7 +35,7 @@ The backend must run on port 3000: `http://localhost:3000`
 From the `ecomm-backend` directory
 
 ```
-npx ng serve dashboard
+npm run dashboard
 ```
 
 The dashboard can run on any available port. It will automatically connect to the frontend running on port 4200.

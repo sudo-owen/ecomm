@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Crosshair, LucideAngularModule, Target, Trash2 } from 'lucide-angular';
+import { ArrowRight, Crosshair, LucideAngularModule, Target, Trash2 } from 'lucide-angular';
 import { Subscription } from 'rxjs';
 import { ProductListComponent } from '../../components/product-list/product-list.component/product-list.component';
 import { Experiment } from '../../models/experiment.interface';
@@ -30,8 +30,10 @@ export class CreateExperimentComponent implements OnInit, OnDestroy {
   iframeUrl;
   isSelectionMode = false;
   iframeLoaded = false;
-  icons = { Target, Trash2, Crosshair };
+  icons = { Target, Trash2, Crosshair, ArrowRight};
   private subscription = new Subscription();
+
+  @ViewChild(ProductListComponent) productListComponent!: ProductListComponent;
 
   tabs: Tab[] = [
     { id: 'preview', label: 'Website Preview' },
@@ -96,6 +98,15 @@ export class CreateExperimentComponent implements OnInit, OnDestroy {
     );
     if (index !== -1) {
       this.experimentParams.selectedElements.splice(index, 1);
+
+      // Check if it's a product element and toggle it in the ProductListComponent
+      if (element.selector.startsWith('data-product-')) {
+        const productId = element.selector.replace('data-product-', '');
+        const product = this.productListComponent.productsSubject.value.find(p => p.id.toString() === productId);
+        if (product) {
+          this.productListComponent.toggleProduct(product);
+        }
+      }
     }
   }
 
