@@ -173,7 +173,9 @@ async function generateProductImage(description: string, saveFolder: string): Pr
       console.log(`Image saved to: ${imagePath}`);
   
       // Return the relative path to be used in your application
-      return `/public/${imageName}`;
+      const publicPath = path.join('public');
+      const relativePath = path.relative(publicPath, imagePath);
+      return `/${relativePath.replace(/\\/g, '/')}`;
     } catch (error) {
       console.error(`Failed to generate or save image for ${description}:`, error);
       return ''; // Return an empty string or a default image path in case of error
