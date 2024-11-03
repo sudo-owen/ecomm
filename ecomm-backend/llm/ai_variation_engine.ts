@@ -15,6 +15,52 @@ const openai = new OpenAI({
   apiKey: process.env["OPENAI_API_KEY"],
 });
 
+interface ExperimentNameDescription {
+  name: string;
+  description: string;
+}
+
+async function generateExperimentNameDescription(item: any, varients: any[]): Promise<ExperimentNameDescription> {
+  const prompt =  "You are working on an AB testing framework. Your task is to generate an experiment name " +
+  "and description based on the provided item and its variants.\n\nFirst, examine the following item:\n<item>\n" +
+  JSON.stringify(item) + "\n</item>\n\nNow, consider the following variants:\n<variants>\n" +
+  JSON.stringify(varients) + "\n</variants>\n\nAnalyze the item and its variants carefully. Pay attention to the changes proposed in the variants and how they differ from the original item.\n\nTo create an experiment name:\n1. Identify the key aspect being tested (e.g., description style, pricing, layout)\n2. Keep it concise and descriptive\n3. Must be between 3\n\nTo create an experiment description:\n1. Briefly explain the purpose of the experiment\n2. Mention the element being varied\n3. Describe the potential impact on user behavior or metrics\n4. Keep it under 2-3 sentences\n\nAfter your analysis, provide an experiment name and description. Format your response as follows:\n\n<experiment_name>\n[Your proposed experiment name here]\n</experiment_name>\n\n<experiment_description>\n[Your proposed experiment description here]\n</experiment_description>\n\nEnsure that your experiment name and description are relevant to the item and variants provided, and that they accurately reflect the nature of the AB test being conducted."
+
+
+    const msg = await anthropic.messages.create({
+      model: "claude-3-5-sonnet-20241022",
+      max_tokens: 1000,
+      temperature: 0.1,
+      messages: [
+        {
+          "role": "user",
+          "content": [
+            {
+              "type": "text",
+              "text": prompt
+            }
+          ]
+        }
+      ]
+    });
+
+    const content = msg.content[0].type === 'text' ? msg.content[0].text : '';
+    const nameMatch = content.match(/<experiment_name>([\s\S]*?)<\/experiment_name>/);
+    const descriptionMatch = content.match(/<experiment_description>([\s\S]*?)<\/experiment_description>/);
+  
+    if (!nameMatch || !descriptionMatch) {
+      throw new Error("Failed to extract experiment name or description from the response");
+    }
+  
+    return {
+      name: nameMatch[1].trim(),
+      description: descriptionMatch[1].trim()
+    };
+}
+
+
+
+
 
 async function generateProductVariations(productDescription: string): Promise<string[]> {
     const prompt = "You are an expert copywriter specializing in crafting compelling product descriptions for e-commerce platforms. Your task is to create five variations of a given product description for A/B testing purposes. These variations will help determine which description is most effective in converting potential customers.\n\nHere is the original product description:\n\n<product_description>\n"
@@ -26,7 +72,7 @@ async function generateProductVariations(productDescription: string): Promise<st
     const msg = await anthropic.messages.create({
     model: "claude-3-5-sonnet-20241022",
     max_tokens: 1000,
-    temperature: 0,
+    temperature: 0.1,
     messages: [
         {
         "role": "user",
@@ -71,7 +117,7 @@ async function getProductImageVariations(productDescription: string): Promise<st
   const msg = await anthropic.messages.create({
     model: "claude-3-5-sonnet-20241022",
     max_tokens: 1000,
-    temperature: 0,
+    temperature: 0.1,
     messages: [
         {
         "role": "user",
@@ -134,4 +180,5 @@ async function generateProductImage(description: string, saveFolder: string): Pr
     }
   }
 
-export { generateProductVariations, getProductImageVariations, generateProductImage };
+export { generateExperimentNameDescription, generateProductVariations, getProductImageVariations, generateProductImage };
+ 
