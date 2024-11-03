@@ -23,7 +23,14 @@ model Product {
   category        String
   fullDescription String
   variants        ProductVariant[]
-  abConfig        ProductAbConfig[] 
+  abConfig       ProductAbConfig[] 
+}
+
+model Session {
+  id              String  @id @default(uuid()) @unique
+  createdAt       DateTime @default(now())
+  productVariants ProductVariant[]
+  defaultAbTests  AbTest[]
 }
 
 model ProductVariant {
@@ -33,14 +40,18 @@ model ProductVariant {
   changes   String  // Store JSON string of changes
   product   Product @relation(fields: [productId], references: [id])
 
+  visits      Int    @default(0)
+  conversions Int   @default(0)
+
   abTest    AbTest  @relation(fields: [abTestId], references: [id])
+  sessions  Session[]
 }
 
 model ProductAbConfig {
   id          Int     @id @default(autoincrement())
   enabled     Boolean
   productId   Int
-  type        String
+  type        String  @default("description")
 
   product     Product @relation(fields: [productId], references: [id])
   abTests     AbTest[]
@@ -53,11 +64,11 @@ model AbTest {
   configId    Int
   name        String
   description String
-  purchases   Int
   status      String
 
   productBlob String 
 
   abConfig    ProductAbConfig @relation(fields: [configId], references: [id])
-  variants    ProductVariant[]   // Store JSON array of variant IDs
+  variants             ProductVariant[]   // Store JSON array of variant IDs
+  sessionsWithDefault   Session[]
 }
