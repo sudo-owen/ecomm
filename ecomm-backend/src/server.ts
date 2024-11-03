@@ -248,37 +248,38 @@ async function saveABTestResults() {
   await writeFile(resultsPath, JSON.stringify(abTestResults, null, 2));
 }
 
-async function generateVariants(product: Product) {
+async function generateVariants(product: Product): Promise<ProductVariant[]> {
     const descriptionVariant = await generateProductVariations(product.fullDescription);
-    const imageVariant = await getProductImageVariations(product.fullDescription);
-
-    let newVariants: ProductVariant[] = [];
+    const imagePromptVariant = await getProductImageVariations(product.fullDescription);
+    const newVariants: ProductVariant[] = [];
 
     descriptionVariant.forEach((fullDescription: string) => {
-      const newVariant: ProductVariant = {
-        id: productVariantMetadata.id++,
-        productId: product.id,
-        changes: {
-          fullDescription: fullDescription
+        const newVariant: ProductVariant = {
+            id: productVariantMetadata.id++,
+            productId: product.id,
+            changes: {
+                fullDescription: fullDescription
+            }
         }
-      }
-      newVariants.push(newVariant);
+        newVariants.push(newVariant);
     });
 
-    imageVariant.forEach(async (imagePrompt: string) => {
-      const imageUrl = generateProductImage(imagePrompt, IMAGES_FOLDER);
-      const newVariant: ProductVariant = {
-        id: productVariantMetadata.id++,
-        productId: product.id,
-        changes: {
-          imageUrl: imageUrl
-        }
-      }
-      newVariants.push(newVariant);
-    });
+    // Use Promise.all to handle async operations in parallel
+    const imageVariants = await Promise.all(imagePromptVariant.map(async (imagePrompt: string) => {
+        const imageUrl = await generateProductImage(imagePrompt, IMAGES_FOLDER);
+        console.log("imageUrl: " + imageUrl);
+        return {
+            id: productVariantMetadata.id++,
+            productId: product.id,
+            changes: {
+                imageUrl: imageUrl
+            }
+        };
+    }));
 
-    console.log("newVariants: " + newVariants);
+    newVariants.push(...imageVariants);
 
+    console.log("newVariants: " + JSON.stringify(newVariants, null, 2));
     return newVariants;
 }
 
@@ -690,7 +691,7 @@ app.get('/api/generate-variant/:productId', async (req: Request, res: Response) 
     if (!generatedVariants) {
       return res.status(404).json({ message: 'Product not found' });
     }
-
+    console.log("generatedVariants: " + generatedVariants);
     productVariants.push(...generatedVariants);
 
     // Save the updated products
