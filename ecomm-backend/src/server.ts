@@ -754,7 +754,7 @@ app.put('/api/variant/visit', catchErrorsDecorator(
       return res.status(400).json({ message: 'Invalid variant' });
     }
 
-    const updatedVariant = await prisma.productVariant.update({
+    const variant = await prisma.productVariant.findFirst({
       where: { 
         productId: productId,
         sessions: {
@@ -765,27 +765,47 @@ app.put('/api/variant/visit', catchErrorsDecorator(
         abTest: {
           status: 'ongoing'
         }
-      },
-      data: {
-        visits: {
-          increment: 1
-        }
       }
     });
 
-    if (!updatedVariant) {
-      await prisma.abTest.update({
+
+    if (!variant) {
+      const abTest = await prisma.abTest.findFirst({
         where: {
-          productId: productId,
+          abConfig: {
+            productId: productId,
+          },
           status: 'ongoing'
+        }
+      });
+
+      if (abTest) {
+        await prisma.abTest.update({
+          where: {
+            id: abTest.id
+          },
+          data: {
+            defaultVisits: {
+              increment: 1
+            }
+          }
+        })
+      }
+    } else {
+
+      await prisma.productVariant.update({
+        where: { 
+          id: variant.id
         },
         data: {
-          defaultVisits: {
+          visits: {
             increment: 1
           }
         }
-      })
+      });
     }
+
+
   }
 ));
 
@@ -796,7 +816,7 @@ app.put('/api/variant/conversion', catchErrorsDecorator(
       return res.status(400).json({ message: 'Invalid variant' });
     }
 
-    const updatedVariant = await prisma.productVariant.update({
+    const variant = await prisma.productVariant.findFirst({
       where: { 
         productId: productId,
         sessions: {
@@ -807,26 +827,46 @@ app.put('/api/variant/conversion', catchErrorsDecorator(
         abTest: {
           status: 'ongoing'
         }
-      },
-      data: {
-        conversions: {
-          increment: 1
-        }
       }
     });
 
-    if (!updatedVariant) {
-      await prisma.abTest.update({
+
+    if (!variant) {
+      console.log("Conversion for default variant");
+      const abTest = await prisma.abTest.findFirst({
         where: {
-          productId: productId,
+          abConfig: {
+            productId: productId,
+          },
           status: 'ongoing'
+        }
+      });
+
+      if (abTest) {
+        await prisma.abTest.update({
+          where: {
+            id: abTest.id
+          },
+          data: {
+            defaultConversions: {
+              increment: 1
+            }
+          }
+        })
+      }
+    } else {
+      console.log("Conversion for variant: " + variant.id)
+
+      await prisma.productVariant.update({
+        where: { 
+          id: variant.id
         },
         data: {
-          defaultConversions: {
+          conversions: {
             increment: 1
           }
         }
-      })
+      });
     }
   }
 ));

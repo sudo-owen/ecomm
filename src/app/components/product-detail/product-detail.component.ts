@@ -7,7 +7,6 @@ import { ProductService } from '../../services/product.service';
 import { CartService } from '../../services/cart.service';
 import { FormsModule } from '@angular/forms';
 import { NgFor, NgIf } from '@angular/common';
-import { ABTestService } from '../../services/ab-test.service';
 import { ApiService } from '../../services/api.service';
 
 @Component({
@@ -30,7 +29,6 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
     private router: Router,
     private productService: ProductService,
     private cartService: CartService,
-    private abTestService: ABTestService,
     private api: ApiService
   ) {}
 
@@ -53,12 +51,12 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
     );
     // Record a visit
     if (this.api.sessionIdSet.value) {
-      this.api.recordVariantVisit(this.product.id.toString());
+      this.api.recordVariantVisit(this.product.id);
     }
     else {
       this.api.sessionIdSet.subscribe(sessionIdSet => {
         if (sessionIdSet) {
-          this.api.recordVariantVisit(this.product.id.toString());
+          this.api.recordVariantVisit(this.product.id);
         }
       });
     }
@@ -83,12 +81,6 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
   }
 
   loadVariations() {
-    // this.abTestService.getVariation(this.product, 'descriptions').subscribe(description => {
-    //   this.description = description;
-    // });
-    // this.abTestService.getVariation(this.product, 'imageUrls').subscribe(imageUrl => {
-    //   this.imageUrl = imageUrl;
-    // });
   }
 
   addToCart(): void {
@@ -97,10 +89,6 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
         this.cartService.addToCart(this.product);
       }
       this.productService.updateStock(this.product.id, this.quantity);
-      
-      // Record A/B test results
-      this.abTestService.recordResult(this.product, 'descriptions', this.description);
-      this.abTestService.recordResult(this.product, 'imageUrls', this.imageUrl);
     }
   }
 
