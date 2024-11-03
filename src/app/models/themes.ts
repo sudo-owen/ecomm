@@ -14,6 +14,8 @@ export interface HeroSectionStyles extends BaseStyles {
   subText: string;
   ctaButton: string;
   imageContainer: string;
+  textContent: string;
+  subTextContent: string;
 }
 
 // Feature Card Styles

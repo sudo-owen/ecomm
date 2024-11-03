@@ -1,7 +1,14 @@
-import { Component } from '@angular/core';
+import { Component, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { LucideAngularModule, Home, List, PlusCircle } from 'lucide-angular';
+import {
+  LucideAngularModule,
+  Home,
+  List,
+  PlusCircle,
+  ChevronLeft,
+  FlaskConical
+} from 'lucide-angular';
 
 @Component({
   selector: 'app-sidebar',
@@ -11,10 +18,18 @@ import { LucideAngularModule, Home, List, PlusCircle } from 'lucide-angular';
   styleUrl: './sidebar.component.css',
 })
 export class SidebarComponent {
+  @Output() sidebarToggled = new EventEmitter<boolean>();
+
   currentPage = 'home';
-  icons = { Home, List, PlusCircle };
+  isExpanded = true;
+  icons = { Home, List, PlusCircle, ChevronLeft, FlaskConical };
 
   setCurrentPage(page: string) {
     this.currentPage = page;
+  }
+
+  toggleSidebar() {
+    this.isExpanded = !this.isExpanded;
+    this.sidebarToggled.emit(!this.isExpanded);
   }
 }

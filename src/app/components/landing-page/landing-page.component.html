@@ -1,26 +1,22 @@
 <!-- landing-page.component.html -->
 
 <!-- Hero Section -->
-<section [ngClass]="(theme$ | async)?.heroSection?.container">
+<section
+  [ngClass]="(theme$ | async)?.heroSection?.container"
+  data-selectable="true"
+  data-component-type="heroSection"
+>
   <div class="container px-4 md:px-6 mx-auto">
     <div
       class="grid gap-6 lg:grid-cols-[1fr_400px] lg:gap-12 xl:grid-cols-[1fr_600px]"
     >
-      <img
-        alt="Stylish Apparel"
-        class="mx-auto aspect-video overflow-hidden rounded-xl object-cover object-center sm:w-full lg:order-last"
-        height="550"
-        src="/public/img/product_1730328250260.png"
-        width="550"
-      />
       <div class="flex flex-col justify-center space-y-4">
         <div class="space-y-2">
           <h1 [ngClass]="(theme$ | async)?.heroSection?.headingText">
-            Discover Your Style with Our Trendy Apparel
+            {{ (theme$ | async)?.heroSection?.textContent }}
           </h1>
           <p [ngClass]="(theme$ | async)?.heroSection?.subText">
-            Designed for your lifestyle. Crafted for comfort. Elevate your
-            wardrobe with our premium clothing collection.
+            {{ (theme$ | async)?.heroSection?.subTextContent }}
           </p>
         </div>
         <div class="flex flex-col gap-2 min-[400px]:flex-row">
@@ -41,7 +37,11 @@
 </section>
 
 <!-- Features Section -->
-<section class="w-full py-12 md:py-24 lg:py-32 bg-muted">
+<section
+  class="w-full py-12 md:py-24 lg:py-32 bg-muted"
+  data-selectable="true"
+  data-component-type="featuresSection"
+>
   <div class="container px-4 md:px-6 mx-auto">
     <h2
       class="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-8"
@@ -127,7 +127,11 @@
 </section>
 
 <!-- Products Section -->
-<section class="w-full py-12 md:py-24 lg:py-32">
+<section
+  class="w-full py-12 md:py-24 lg:py-32"
+  data-selectable="true"
+  data-component-type="productsSection"
+>
   <div class="container px-4 md:px-6 mx-auto">
     <h2
       class="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-8"
@@ -147,7 +151,11 @@
 </section>
 
 <!-- Testimonials Section -->
-<section class="w-full py-12 md:py-24 lg:py-32 bg-muted">
+<section
+  class="w-full py-12 md:py-24 lg:py-32 bg-muted"
+  data-selectable="true"
+  data-component-type="testimonialsSection"
+>
   <div class="container px-4 md:px-6 mx-auto">
     <h2
       class="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-8"
@@ -180,16 +188,20 @@
         </p>
       </div>
       <button [ngClass]="(theme$ | async)?.heroSection?.ctaButton">
-        Shop Now
-        <svg class="ml-2 h-4 w-4" viewBox="0 0 24 24">
-          <path
-            d="M9 18L15 12L9 6"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-        </svg>
+        <div>
+          Shop Now
+        </div>
+        <div>
+          <svg class="ml-2 h-4 w-4" viewBox="0 0 24 24">
+            <path
+              d="M9 18L15 12L9 6"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </div>
       </button>
     </div>
   </div>

@@ -9,4 +9,10 @@ import { SidebarComponent } from './components/sidebar/sidebar.component';
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',
 })
-export class AppComponent {}
+export class AppComponent {
+  isSidebarCollapsed = false;
+
+  onSidebarToggle(isCollapsed: boolean) {
+    this.isSidebarCollapsed = isCollapsed;
+  }
+}

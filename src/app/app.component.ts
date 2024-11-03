@@ -3,6 +3,7 @@ import { RouterOutlet } from '@angular/router';
 import { HeaderComponent } from './components/header/header.component';
 import { FooterComponent } from './components/footer/footer.component';
 import { CartDrawerComponent } from './components/cart-drawer/cart-drawer.component';
+import { ElementSelectionService } from './services/element-selection.service';
 
 @Component({
   selector: 'app-root',
@@ -23,7 +24,16 @@ import { CartDrawerComponent } from './components/cart-drawer/cart-drawer.compon
     </div>
     <app-cart-drawer></app-cart-drawer>
   `,
+  providers: [ElementSelectionService],
 })
 export class AppComponent {
-  title = 'ecomm';
+  constructor(private elementSelectionService: ElementSelectionService) {}
+
+  ngOnInit() {
+    window.addEventListener('message', (event) => {
+      if (event.data.type === 'TOGGLE_SELECTION_MODE') {
+        this.elementSelectionService.toggleSelectionMode(event.data.payload);
+      }
+    });
+  }
 }

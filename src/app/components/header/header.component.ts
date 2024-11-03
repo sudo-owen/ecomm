@@ -71,7 +71,7 @@ import { RouterLink } from '@angular/router';
       </a>
       <nav class="flex gap-4 sm:gap-6">
         <a
-          class="text-sm font-medium hover:underline underline-offset-4"
+          class="font-medium hover:underline underline-offset-4 font-semibold"
           routerLink="/products"
           >Products</a
         >

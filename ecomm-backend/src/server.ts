@@ -3,8 +3,12 @@ import type { Request, Response } from "express";
 import { readFile, writeFile } from "fs/promises";
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+<<<<<<< HEAD
 import { generateProductVariations, getProductImageVariations, generateProductImage } from '../llm/ai_variation_engine';
 import { PrismaClient, Prisma } from '@prisma/client'
+=======
+import { generateProductVariations, getProductImageVariations, generateProductImage, generateThemeVariations } from '../llm/ai_variation_engine';
+>>>>>>> main
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -41,6 +45,7 @@ interface ABTest {
   result?: ABTestResult 
 }
 
+<<<<<<< HEAD
 interface ABTestReponse {
   id: number,
   product: Product,
@@ -50,22 +55,96 @@ interface ABTestReponse {
   result?: ABTestResult 
 }
 
+=======
+>>>>>>> main
 interface ABTestResult {
   productId: number;
   variationType: 'description' | 'image';
   variationIndex: number;
   purchases: number;
 }
+<<<<<<< HEAD
 app.use(express.json())
+=======
+
+// Base export interface for common styles
+export interface BaseStyles {
+  padding?: string;
+  margin?: string;
+  background?: string;
+  rounded?: string;
+  shadow?: string;
+}
+
+// Hero Section Styles
+interface HeroSectionStyles extends BaseStyles {
+  container: string;
+  headingText: string;
+  subText: string;
+  ctaButton: string;
+  imageContainer: string;
+  textContent: string;
+  subTextContent: string;
+}
+
+// Feature Card Styles
+interface FeatureCardStyles extends BaseStyles {
+  container: string;
+  icon: string;
+  title: string;
+  description: string;
+  image: string;
+}
+
+// Testimonial Card Styles
+interface TestimonialCardStyles extends BaseStyles {
+  container: string;
+  starIcon: string;
+  quote: string;
+  authorContainer: string;
+  authorName: string;
+  authorTitle: string;
+}
+
+// Product Card Styles
+interface ProductCardStyles extends BaseStyles {
+  container: string;
+  title: string;
+  description: string;
+  price: string;
+  ctaButton: string;
+}
+
+// Product Holder Styles
+interface ProductHolderStyles extends BaseStyles {
+  container: string;
+  numItems: number;
+}
+
+// Main Theme Interface
+interface AppTheme {
+  heroSection: HeroSectionStyles;
+  featureCard: FeatureCardStyles;
+  testimonialCard: TestimonialCardStyles;
+  productCard: ProductCardStyles;
+  productHolder: ProductHolderStyles;
+}
+
+
+app.use(cors());
+app.use(express.json());
+>>>>>>> main
 app.use('/public', express.static(join(__dirname, 'public')));
 
 const PRODUCT_FILE = join(__dirname, 'public', 'data', 'products.json');
+const THEME_FILE = join(__dirname, 'public', 'data', 'themes.json');
 const PRODUCT_VARIANTS_FILE = join(__dirname, 'public', 'data', 'product_variants.json');
 const AB_TESTS_FILE = join(__dirname, 'public', 'data', 'ab_tests.json');
 const IMAGES_FOLDER = join(__dirname, 'public', 'img');
 
 let products: Product[] = [];
 let abTests: ABTest[] = [];
+let theme: AppTheme | undefined = undefined;
 const abTestResults: ABTestResult[] = [];
 
 let productVariantMetadata = {
@@ -84,6 +163,7 @@ async function loadProducts() {
   }
 }
 
+<<<<<<< HEAD
 async function populateDatabaseFromFile() {
   // Populate products table using products.json
   // checks if empty first
@@ -111,6 +191,13 @@ async function populateDatabaseFromFile() {
         fullDescription: product.fullDescription
       }
     });
+=======
+async function loadThemes() {
+  try {
+    const themeData = await readFile(THEME_FILE, 'utf-8');
+    theme = JSON.parse(themeData);
+  } catch (error) {
+>>>>>>> main
   }
 }
 
@@ -533,6 +620,28 @@ app.get('/api/ab-test/:id', (req: Request, res: Response) => {
 app.get('/api/ab-test-results', (req: any, res: { json: (arg0: ABTestResult[]) => void; }) => {
   res.json(abTestResults);
 });
+// Add the new endpoint for generating theme variations
+app.post('/api/generate-theme-variations', async (req: Request, res: Response) => {
+  try {
+    const { elementName, themeParams } = req.body;
+
+    if (!elementName || !themeParams) {
+      return res.status(400).json({ message: 'Missing required fields' });
+    }
+
+    const variations = await generateThemeVariations(elementName, themeParams);
+
+    res.json({ variations });
+  } catch (error) {
+    console.error('Error generating theme variations:', error);
+    res.status(500).json({ message: 'Error generating theme variations' });
+  }
+});
+
+// Getter for themes
+app.get('/api/themes', (_req: any, res: { json: (arg0: AppTheme) => void; }) => {
+  res.json(theme!);
+});
 
 // Add the new endpoint for generating variations
 app.get('/api/generate-variant/:productId', async (req: Request, res: Response) => {
@@ -562,6 +671,7 @@ app.get('/api/generate-variant/:productId', async (req: Request, res: Response) 
 });
 
 async function startServer() {
+<<<<<<< HEAD
   await loadProducts();
   await loadProductVariants();
   await loadABTests();
@@ -570,6 +680,19 @@ async function startServer() {
   app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
   });
+=======
+  try {
+    await loadProducts();
+    await loadProductVariants();
+    await loadABTests();
+    await loadThemes();
+    app.listen(port, () => {
+      console.log(`Server is running on http://localhost:${port}`);
+    });
+  } catch (error) {
+    console.error('Error starting server:', error);
+  }
+>>>>>>> main
 }
 
-startServer();
+startServer().catch(error => console.error('Unhandled error:', error));

@@ -1,155 +1,168 @@
-<div class="max-w-4xl mx-auto p-6 space-y-8">
-  <h2 class="text-4xl font-bold">Create New Experiment (Advanced)</h2>
+<div class="max-w-7xl mx-auto p-6 space-y-8">
+  <h2 class="text-4xl font-bold flex">Create Experiment</h2>
 
-  <div class="bg-white rounded-lg shadow-sm border border-gray-200">
-    <form (ngSubmit)="handleSubmit()">
-      <div class="p-6">
-        <h3 class="text-2xl font-semibold">Experiment Details</h3>
-      </div>
+  <!-- Website Preview -->
+  <div class="bg-white shadow-sm border border-gray-200">
+    <!-- <div
+      class="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-100"
+    >
+      <h3 class="text-2xl font-semibold">Select Elements</h3>
+      <button
+        (click)="toggleSelectionMode()"
+        [class.bg-blue-600]="isSelectionMode"
+        class="px-4 py-2 rounded-lg transition-colors text-white"
+        [ngClass]="{
+          'bg-black hover:bg-gray-800': isSelectionMode,
+          'bg-blue-600 hover:bg-blue-700': !isSelectionMode,
+        }"
+      >
+        {{ isSelectionMode ? "Exit Selection Mode" : "Enter Selection Mode" }}
+      </button>
+    </div> -->
 
-      <div class="p-6 space-y-6">
-        <!--<div class="space-y-2">
-          <label for="prompt" class="block text-lg font-medium"
-            >Describe the Experiment</label
-          >
-          <textarea
-            id="prompt"
-            class="w-full rounded-lg border border-gray-300 p-3 min-h-[120px] focus:ring-2 focus:ring-black focus:border-black"
-            placeholder="Describe the experiment you want to create..."
-            [(ngModel)]="prompt"
-            name="prompt"
-            required
-          ></textarea>
-        </div>-->
-
-        <div class="space-y-2">
-          <label for="duration" class="block text-lg font-medium"
-            >Test Duration (days)</label
-          >
-          <input
-            id="duration"
-            type="number"
-            class="w-full rounded-lg border border-gray-300 p-3 focus:ring-2 focus:ring-black focus:border-black"
-            [(ngModel)]="experimentParams.duration"
-            name="duration"
-            required
-          />
-        </div>
-
-        <div class="space-y-2">
-          <label for="targetAudience" class="block text-lg font-medium"
-            >Target Audience</label
-          >
-          <select
-            class="w-full rounded-lg border border-gray-300 p-3 bg-white focus:ring-2 focus:ring-black focus:border-black"
-            [(ngModel)]="experimentParams.targetAudience"
-            name="targetAudience"
-          >
-            <option value="all">All Users</option>
-            <option value="new">New Users</option>
-            <option value="returning">Returning Users</option>
-          </select>
-        </div>
-
-        <div class="space-y-2">
-          <label for="trafficAllocation" class="block text-lg font-medium"
-            >Traffic Allocation (%)</label
-          >
-          <input
-            id="trafficAllocation"
-            type="number"
-            class="w-full rounded-lg border border-gray-300 p-3 focus:ring-2 focus:ring-black focus:border-black"
-            min="1"
-            max="100"
-            [(ngModel)]="experimentParams.trafficAllocation"
-            name="trafficAllocation"
-            required
-          />
-        </div>
-      </div>
-
-      <div class="p-6 border-t border-gray-200">
+    <!-- Tab Navigation -->
+    <div class="border-b border-gray-200">
+      <nav class="flex space-x-4 px-6" role="tablist">
         <button
-          type="submit"
-          class="px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
-          [disabled]="isLoading"
+          *ngFor="let tab of tabs"
+          [attr.aria-selected]="activeTab === tab.id"
+          [attr.aria-controls]="tab.id + '-panel'"
+          role="tab"
+          (click)="setActiveTab(tab.id)"
+          class="px-3 py-2 text-sm font-medium rounded-t-lg transition-colors"
+          [ngClass]="
+            activeTab === tab.id
+              ? 'border-b-2 border-blue-500 text-blue-600'
+              : 'text-gray-500 hover:text-gray-700'
+          "
         >
-          {{ isLoading ? "Generating..." : "Generate Experiment" }}
+          {{ tab.label }}
         </button>
+      </nav>
+    </div>
+
+    <!-- Tab Panels -->
+    <div
+      class="relative"
+      role="tabpanel"
+      [attr.aria-labelledby]="'tab-' + activeTab"
+    >
+      <!-- Website Preview Panel -->
+      <div *ngIf="activeTab === 'preview'" class="relative">
+        <div
+          class="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-100"
+        >
+          <div class="text-2xl font-semibold">Select Elements</div>
+          <button
+            (click)="toggleSelectionMode()"
+            [class.bg-blue-600]="isSelectionMode"
+            class="px-4 py-2 rounded-lg transition-colors text-white"
+            [ngClass]="{
+              'bg-black hover:bg-gray-800': isSelectionMode,
+              'bg-blue-600 hover:bg-blue-700': !isSelectionMode,
+            }"
+          >
+            {{
+              isSelectionMode ? "Exit Selection Mode" : "Enter Selection Mode"
+            }}
+          </button>
+        </div>
+
+        <!-- Loading State -->
+        <div
+          *ngIf="!iframeLoaded"
+          class="absolute inset-0 bg-gray-50 flex items-center justify-center"
+        >
+          <div class="text-center">
+            <div
+              class="animate-spin rounded-full h-12 w-12 border-b-2 border-black mx-auto"
+            ></div>
+            <p class="mt-4 text-gray-600">Loading website preview...</p>
+          </div>
+        </div>
+
+        <!-- Website Preview Iframe -->
+        <iframe
+          [src]="iframeUrl"
+          class="w-full h-[calc(100vh-27rem)] border-0"
+          sandbox="allow-same-origin allow-scripts allow-forms allow-popups"
+          (load)="onIframeLoad()"
+        ></iframe>
       </div>
-    </form>
+
+      <!-- Products Panel -->
+      <div *ngIf="activeTab === 'products'" class="p-6">
+        <app-product-list
+          (allSelectedProducts)="parseProducts($event)"
+        ></app-product-list>
+      </div>
+    </div>
   </div>
 
-  <div
-    *ngIf="generatedExperiment"
-    class="bg-white rounded-lg shadow-sm border border-gray-200"
-  >
-    <div class="p-6 border-b border-gray-200">
-      <h3 class="text-2xl font-semibold">Generated Experiment</h3>
-    </div>
-
-    <div class="p-6 space-y-6">
-      <div class="space-y-2">
-        <label class="block text-lg font-medium">Name</label>
-        <input
-          [value]="generatedExperiment.name"
-          class="w-full rounded-lg border border-gray-300 p-3 bg-gray-50"
-          readonly
-        />
+  <!-- Selected Elements Section - Always visible -->
+  <div class="bg-white shadow-sm border border-gray-200 rounded-lg">
+    <div
+      class="px-6 py-4 border-b border-gray-200 flex items-center justify-between"
+    >
+      <div class="flex items-center gap-2">
+        <lucide-icon [name]="icons.Crosshair" class="h-5 w-5"></lucide-icon>
+        <h3 class="text-xl font-semibold">Selected Elements</h3>
       </div>
-
-      <div class="space-y-2">
-        <label class="block text-lg font-medium">Description</label>
-        <textarea
-          [value]="generatedExperiment.description"
-          class="w-full rounded-lg border border-gray-300 p-3 min-h-[120px] bg-gray-50"
-          readonly
-        ></textarea>
-      </div>
-
-      <div class="space-y-2">
-        <label class="block text-lg font-medium">Variants</label>
-        <ul class="list-disc pl-5 space-y-1">
-          <li *ngFor="let variant of generatedExperiment.variants">
-            {{ variant.name }}
-          </li>
-        </ul>
-      </div>
-
-      <div class="space-y-2">
-        <label class="block text-lg font-medium">Test Duration</label>
-        <input
-          [value]="experimentParams.duration + ' days'"
-          class="w-full rounded-lg border border-gray-300 p-3 bg-gray-50"
-          readonly
-        />
-      </div>
-
-      <div class="space-y-2">
-        <label class="block text-lg font-medium">Target Audience</label>
-        <input
-          [value]="experimentParams.targetAudience"
-          class="w-full rounded-lg border border-gray-300 p-3 bg-gray-50"
-          readonly
-        />
-      </div>
-
-      <div class="space-y-2">
-        <label class="block text-lg font-medium">Traffic Allocation</label>
-        <input
-          [value]="experimentParams.trafficAllocation + '%'"
-          class="w-full rounded-lg border border-gray-300 p-3 bg-gray-50"
-          readonly
-        />
-      </div>
-    </div>
-
-    <div class="p-6 border-t border-gray-200">
       <button
-        class="px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
+        *ngIf="experimentParams.selectedElements.length > 0"
+        (click)="clearSelectedElements()"
+        class="text-gray-500 hover:text-red-500 transition-colors flex items-center gap-1 text-sm"
       >
-        Save Experiment
+        <lucide-icon [name]="icons.Trash2" class="h-4 w-4"></lucide-icon>
+        Delete All
       </button>
+    </div>
+
+    <div class="p-6">
+      <!-- Selected Elements Bubbles -->
+      <div
+        *ngIf="experimentParams.selectedElements.length > 0"
+        class="flex flex-wrap gap-3"
+      >
+        <div
+          *ngFor="let element of experimentParams.selectedElements"
+          class="group flex items-center gap-2 bg-gray-100 px-4 py-2 rounded-full hover:bg-gray-200 transition-colors"
+        >
+          <div class="flex flex-col">
+            <div class="font-medium">{{ element.location }}</div>
+            <div class="text-sm text-gray-600 truncate w-48">
+              {{ element.originalContent }}
+            </div>
+          </div>
+          <button
+            (click)="removeSelectedElement(element)"
+            class="text-gray-400 hover:text-red-500 transition-colors ml-2"
+          >
+            <lucide-icon [name]="icons.Trash2" class="h-4 w-4"></lucide-icon>
+          </button>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div
+        *ngIf="experimentParams.selectedElements.length === 0"
+        class="text-center text-gray-500 py-8"
+      >
+        <p>
+          No elements selected. Enter selection mode and click on elements to
+          select them.
+        </p>
+      </div>
+
+      <!-- Submit Button -->
+      <div *ngIf="experimentParams.selectedElements.length > 0" class="mt-6">
+        <button
+          class="w-full px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors flex items-center justify-center gap-2"
+        >
+          <span>Create Experiment</span>
+          <lucide-icon name="arrow-right" class="h-4 w-4"></lucide-icon>
+        </button>
+      </div>
     </div>
   </div>
 </div>
