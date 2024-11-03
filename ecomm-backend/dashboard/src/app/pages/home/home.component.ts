@@ -65,7 +65,7 @@ export class HomeComponent implements OnInit {
     let totalConversions = 0;
     let totalImpressions = 0;
   
-    this.allExperiments.forEach((experiment: ExperimentWithProgress) => {
+    this.activeExperiments.forEach((experiment: ExperimentWithProgress) => {
       experiment.variants.forEach((variant: any) => {
         totalConversions += variant.conversions;
         totalImpressions += variant.visits;
@@ -76,7 +76,7 @@ export class HomeComponent implements OnInit {
   }
   
   private calculateTotalConversions(): number {
-    return this.allExperiments.reduce((total: number, experiment: ExperimentWithProgress) => {
+    return this.activeExperiments.reduce((total: number, experiment: ExperimentWithProgress) => {
       return total + experiment.variants.reduce((expTotal: number, variant: any) => expTotal + variant.conversions, 0);
     }, 0);
   }
