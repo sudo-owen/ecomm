@@ -66,6 +66,9 @@ model AbTest {
   description String
   status      String
 
+  defaultConversions Int @default(0)
+  defaultVisits Int @default(0)
+
   productBlob String 
 
   abConfig    ProductAbConfig @relation(fields: [configId], references: [id])

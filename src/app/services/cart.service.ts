@@ -36,7 +36,7 @@ export class CartService {
     this.cartSubject.next([...this.cartItems]);
 
     // Record conversion
-    this.api.recordVariantConversion(product.id.toString());
+    this.api.recordVariantConversion(product.id);
   }
 
   updateQuantity(productId: number, newQuantity: number): void {

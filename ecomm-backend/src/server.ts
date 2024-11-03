@@ -724,45 +724,110 @@ app.get('/api/ab-test', catchErrorsDecorator(
   }
 ));
 
-app.put('/api/ab-test', catchErrorsDecorator(
+app.put('/api/ab-tests/:id', catchErrorsDecorator(
   async (req: Request, res: Response) => {
-    const { abTestId, enabled } = req.body;
+    const id = parseInt(req.params.id);
+    if (!id) {
+      return res.status(400).json({ message: 'Invalid ab test id' });
+    }
+
+    const updateData = req.body.data;
+    try {
+      const abTest = await prisma.abTest.update({
+        where: { id: id },
+        data: updateData
+      });
+    } catch (error) {
+      console.error('Error updating A/B test:', error);
+      res.status(400).json({ message: 'Error updating A/B test' });
+    }
   }
 ));
 
-app.put('/api/variant/:id/visit', catchErrorsDecorator(
+
+
+app.put('/api/variant/visit', catchErrorsDecorator(
   async (req: Request, res: Response) => {
-    const variantId = parseInt(req.params.id);
-    if (!variantId) {
-      return res.status(400).json({ message: 'Invalid variant id' });
+
+    const { productId, sessionId } = req.body;
+    if (!productId || !sessionId) {
+      return res.status(400).json({ message: 'Invalid variant' });
     }
-    console.log('Variant visit: ', variantId);
-    await prisma.productVariant.update({
-      where: { id: variantId },
+
+    const updatedVariant = await prisma.productVariant.update({
+      where: { 
+        productId: productId,
+        sessions: {
+          some: {
+            id: sessionId
+          }
+        },
+        abTest: {
+          status: 'ongoing'
+        }
+      },
       data: {
         visits: {
           increment: 1
         }
       }
     });
+
+    if (!updatedVariant) {
+      await prisma.abTest.update({
+        where: {
+          productId: productId,
+          status: 'ongoing'
+        },
+        data: {
+          defaultVisits: {
+            increment: 1
+          }
+        }
+      })
+    }
   }
 ));
 
-app.put('/api/variant/:id/conversion', catchErrorsDecorator(
+app.put('/api/variant/conversion', catchErrorsDecorator(
   async (req: Request, res: Response) => {
-    const variantId = parseInt(req.params.id);
-    if (!variantId) {
-      return res.status(400).json({ message: 'Invalid variant id' });
+    const { productId, sessionId } = req.body;
+    if (!productId || !sessionId) {
+      return res.status(400).json({ message: 'Invalid variant' });
     }
 
-    await prisma.productVariant.update({
-      where: { id: variantId },
+    const updatedVariant = await prisma.productVariant.update({
+      where: { 
+        productId: productId,
+        sessions: {
+          some: {
+            id: sessionId
+          }
+        },
+        abTest: {
+          status: 'ongoing'
+        }
+      },
       data: {
         conversions: {
           increment: 1
         }
       }
     });
+
+    if (!updatedVariant) {
+      await prisma.abTest.update({
+        where: {
+          productId: productId,
+          status: 'ongoing'
+        },
+        data: {
+          defaultConversions: {
+            increment: 1
+          }
+        }
+      })
+    }
   }
 ));
 

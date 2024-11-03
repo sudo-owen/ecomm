@@ -66,21 +66,22 @@ export class ApiService {
     return this.http.get(`${this.apiUrl}/ab-test-results`);
   }
 
-  hasVisited: Set<string>  = new Set();
+  hasVisited: Set<number>  = new Set();
 
-  async recordVariantVisit(variantId: string): Promise<void> {
-    if (this.hasVisited.has(variantId)) {
+  async recordVariantVisit(productId: number): Promise<void> {
+    if (this.hasVisited.has(productId)) {
       return;
     }
-    this.hasVisited.add(variantId);
+    this.hasVisited.add(productId);
     try {
-      const response = await fetch(`${this.apiUrl}/variant/${variantId}/visit`, {
+      const response = await fetch(`${this.apiUrl}/variant/visit`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           'sessionId': this.getSessionId(),
+          'productId': productId
         })
       });
       if (!response.ok) {
@@ -92,15 +93,16 @@ export class ApiService {
     }
   }
 
-  async recordVariantConversion(variantId: string): Promise<void> {
+  async recordVariantConversion(productId: number): Promise<void> {
     try {
-      const response = await fetch(`${this.apiUrl}/variant/${variantId}/conversion`, {
+      const response = await fetch(`${this.apiUrl}/variant/conversion`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           'sessionId': this.getSessionId(),
+          'productId': productId
         }),
       });
       if (!response.ok) {
