@@ -173,6 +173,5 @@ export class CreateExperimentComponent implements OnInit, OnDestroy {
   onIframeLoad() {
     this.iframeLoaded = true;
     // When the iframe is loaded, update it with the active experiments
-    this.iframeService.updateIframeWithActiveExperiments(this.experimentParams.selectedElements);
   }
 }
