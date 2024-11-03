@@ -721,7 +721,8 @@ app.put('/api/ab-test-configs/:type/:id', catchErrorsDecorator(
 
 app.get('/api/ab-tests', catchErrorsDecorator(
   async (req: Request, res: Response) => {
-    const abTests = await prisma.abTest.findMany();
+    const abTests = await prisma.abTest.findMany({include: {variants: true}});
+    // console.log(abTests);
     res.status(200).json(abTests);
   }
 ));
@@ -739,7 +740,7 @@ app.get('/api/ab-test/:id', catchErrorsDecorator(
           id: abTestId
         },
         include: {
-          product: true
+          variants: true
         }
       }
     );

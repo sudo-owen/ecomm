@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Experiment } from '../../models/experiment.interface';
@@ -10,66 +10,8 @@ import { Experiment } from '../../models/experiment.interface';
   templateUrl: './experiments-list.component.html',
   styleUrls: ['./experiments-list.component.css'],
 })
-export class ExperimentsListComponent {
+export class ExperimentsListComponent implements OnInit {
   allExperiments: Experiment[] = []
-  /*
-    {
-      id: 1,
-      name: 'Button Color Test',
-      status: 'Active',
-      startDate: '2023-05-01',
-      endDate: '2023-05-31',
-      description: 'Testing button color variations',
-      conversions: 1200,
-      impressions: 10000,
-      variants: [],
-    },
-    {
-      id: 2,
-      name: 'Landing Page Layout',
-      status: 'Active',
-      startDate: '2023-05-15',
-      endDate: '2023-06-15',
-      description: 'Testing different landing page layouts',
-      conversions: 800,
-      impressions: 8000,
-      variants: [],
-    },
-    {
-      id: 3,
-      name: 'Pricing Model Test',
-      status: 'Active',
-      startDate: '2023-06-01',
-      endDate: '2023-06-30',
-      description: 'Testing various pricing models',
-      conversions: 1500,
-      impressions: 12000,
-      variants: [],
-    },
-    {
-      id: 4,
-      name: 'Email Subject Line Test',
-      status: 'Completed',
-      startDate: '2023-04-01',
-      endDate: '2023-04-30',
-      description: 'Testing email subject line variations',
-      conversions: 2000,
-      impressions: 20000,
-      variants: [],
-    },
-    {
-      id: 5,
-      name: 'Checkout Process Test',
-      status: 'Completed',
-      startDate: '2023-03-15',
-      endDate: '2023-04-15',
-      description: 'Testing streamlined checkout process',
-      conversions: 1800,
-      impressions: 15000,
-      variants: [],
-    },
-  ];
-  */
 
   ngOnInit() {
     fetch('http://localhost:3000/api/ab-tests').then((response) => {
@@ -92,7 +34,19 @@ export class ExperimentsListComponent {
     });
   }
 
-  getConversionRate(conversions: number, impressions: number): string {
-    return ((conversions / impressions) * 100).toFixed(2);
+  getTotalVisits(experiment: any): number {
+    return experiment.variants.reduce((total: number, variant: any) => total + variant.visits, 0);
+  }
+
+  getBestConversionRate(experiment: any): number {
+    const rates = experiment.variants.map((variant: any) => 
+      variant.visits > 0 ? (variant.conversions / variant.visits) * 100 : 0
+    );
+    return Math.max(...rates);
+  }
+
+  getDefaultConversionRate(experiment: any): number {
+    // Mock implementation - replace with actual logic to get default rate
+    return 2.0; // 2% as an example
   }
 }

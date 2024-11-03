@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { LucideAngularModule, ArrowLeft } from 'lucide-angular';
-import { Experiment } from '../../models/experiment.interface';
+import { ExperimentWithProduct } from '../../models/experiment.interface';
 
 @Component({
   selector: 'app-experiment-detail',
@@ -13,21 +13,7 @@ import { Experiment } from '../../models/experiment.interface';
 })
 export class ExperimentDetailComponent implements OnInit {
   icons = { ArrowLeft };
-  experimentData: Experiment = {
-    id: 1,
-    name: 'Button Color Test',
-    status: 'Active',
-    startDate: '2023-05-01',
-    endDate: '2023-05-31',
-    description:
-      'Testing the impact of different button colors on click-through rates.',
-    variants: [
-      { name: 'Control (Blue)', impressions: 5000, conversions: 500 },
-      { name: 'Variant A (Green)', impressions: 5000, conversions: 600 },
-    ],
-    impressions: 10000,
-    conversions: 1100,
-  };
+  experimentData = {} as ExperimentWithProduct;
 
   constructor(
     private route: ActivatedRoute,
@@ -37,15 +23,43 @@ export class ExperimentDetailComponent implements OnInit {
   ngOnInit() {
     this.route.params.subscribe((params) => {
       const id = params['id'];
-      // fetchExperimentData(id);
+      fetch(`http://localhost:3000/api/ab-test/${id}`).then((response) => {
+        response.json().then((data) => {
+          this.experimentData = {
+            ...data,
+            product: JSON.parse(data.productBlob)
+          };
+        });
+      });
     });
   }
 
-  calculateConversionRate(conversions: number, impressions: number): string {
-    return ((conversions / impressions) * 100).toFixed(2);
+  calculateConversionRate(conversions: number, impressions: number): number {
+    if (impressions === 0) return 0;
+    return (conversions / impressions) * 100;
   }
 
   goBack() {
     this.router.navigate(['/experiments']);
+  }
+  getChanges(changesString: string): Array<{key: string, value: any}> {
+    try {
+      const changesObj = JSON.parse(changesString);
+      console.log(changesObj);
+      return Object.entries(changesObj).map(([key, value]) => ({ key, value }));
+    } catch (error) {
+      console.error('Error parsing changes:', error);
+      return [];
+    }
+  }
+
+  getBestConversionRate(variants: any[]): string {
+    if (!variants || variants.length === 0) return '0.00';
+    
+    const bestRate = Math.max(...variants.map(variant => 
+      this.calculateConversionRate(variant.conversions, variant.visits)
+    ));
+    
+    return bestRate.toFixed(2);
   }
 }

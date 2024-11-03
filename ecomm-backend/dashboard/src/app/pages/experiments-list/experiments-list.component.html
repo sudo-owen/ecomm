@@ -17,19 +17,13 @@
               Status
             </th>
             <th class="px-6 py-4 text-left text-sm font-medium text-gray-500">
-              Start Date
+              Variants
             </th>
             <th class="px-6 py-4 text-left text-sm font-medium text-gray-500">
-              End Date
+              Total Visits
             </th>
             <th class="px-6 py-4 text-left text-sm font-medium text-gray-500">
-              Conversions
-            </th>
-            <th class="px-6 py-4 text-left text-sm font-medium text-gray-500">
-              Impressions
-            </th>
-            <th class="px-6 py-4 text-left text-sm font-medium text-gray-500">
-              Conversion Rate
+              Best Conversion Rate
             </th>
           </tr>
         </thead>
@@ -46,33 +40,25 @@
               <span
                 [ngClass]="{
                   'px-2 py-1 rounded-full text-xs font-medium': true,
-                  'bg-green-100 text-green-800': experiment.status === 'Active',
-                  'bg-gray-100 text-gray-800':
-                    experiment.status === 'Completed',
+                  'bg-green-100 text-green-800': experiment.status === 'ongoing',
+                  'bg-gray-100 text-gray-800': experiment.status === 'completed'
                 }"
               >
                 {{ experiment.status }}
               </span>
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-gray-600">
-              {{ experiment.startDate }}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-gray-600">
-              {{ experiment.endDate }}
-            </td>
             <td class="px-6 py-4 whitespace-nowrap font-medium">
-              {{ experiment.conversions }}
+              {{ experiment.variants.length }}
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-gray-600">
-              {{ experiment.impressions }}
+              {{ getTotalVisits(experiment) }}
             </td>
-            <td class="px-6 py-4 whitespace-nowrap font-medium">
-              {{
-                getConversionRate(
-                  experiment.conversions,
-                  experiment.impressions
-                )
-              }}%
+            <td class="px-6 py-4 whitespace-nowrap font-medium"
+                [ngClass]="{
+                  'text-green-600': getBestConversionRate(experiment) > getDefaultConversionRate(experiment),
+                  'text-red-600': getBestConversionRate(experiment) <= getDefaultConversionRate(experiment)
+                }">
+              {{ getBestConversionRate(experiment).toFixed(2) }}%
             </td>
           </tr>
         </tbody>
