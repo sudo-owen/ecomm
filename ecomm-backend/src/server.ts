@@ -365,6 +365,7 @@ async function getProductWithVariant(product: Product, session_id: string) {
     console.log(`Variant(${variant.id}) for product(${product.id}) session(${session_id})`);
     
     const changes = JSON.parse(variant.changes);
+    //console.log(`Changes (${product.id}): `, changes);
     product = { ...product, ...changes };
   } else if (isDefault) {
     console.log(`Default for product(${product.id}) session(${session_id})`);
@@ -381,6 +382,7 @@ async function getProductWithVariant(product: Product, session_id: string) {
         id: 'asc'
       }
     });
+    console.log('Variants: ', variants);
 
     let random = Math.random();
 
@@ -430,8 +432,8 @@ async function getProductWithVariant(product: Product, session_id: string) {
           }
         });
 
-        console.log('Updated product variant', updatedProductVariant);
         const changes = JSON.parse(newVariant.changes);
+        //console.log(`Changes (${product.id}): `, changes);
         
         product = {...product, ...changes};
       }
@@ -454,7 +456,6 @@ app.get('/api/products', async (req: Request, res: Response) => {
         p => getProductWithVariant(p, session_id)
       )
     );
-    console.log('Variant Products: ', variantProducts);
 
     res.status(200).json(variantProducts);
   } catch (error) {
