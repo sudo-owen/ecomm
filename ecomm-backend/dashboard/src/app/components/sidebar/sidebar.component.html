@@ -45,7 +45,7 @@
         [class.hidden]="!isExpanded"
         class="ml-3 transition-opacity duration-200"
       >
-        List
+        Experiments
       </span>
       <span *ngIf="!isExpanded" class="tooltip"> List </span>
     </a>
@@ -56,12 +56,12 @@
       [class.bg-gray-100]="currentPage === 'create'"
       class="nav-link"
     >
-      <lucide-icon [name]="icons.FlaskConical" class="h-5 w-5"></lucide-icon>
+      <lucide-icon [name]="icons.PlusCircle" class="h-5 w-5"></lucide-icon>
       <span
         [class.hidden]="!isExpanded"
         class="ml-3 transition-opacity duration-200"
       >
-        Create
+        Create New
       </span>
       <span *ngIf="!isExpanded" class="tooltip"> Create </span>
     </a>

@@ -1,11 +1,9 @@
 <div class="max-w-7xl mx-auto p-6 space-y-8">
-  <h2 class="text-4xl font-bold flex">
-    Create Experiment
-  </h2>
+  <h2 class="text-4xl font-bold flex">Create Experiment</h2>
 
   <!-- Website Preview -->
   <div class="bg-white shadow-sm border border-gray-200">
-    <div
+    <!-- <div
       class="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-100"
     >
       <h3 class="text-2xl font-semibold">Select Elements</h3>
@@ -20,29 +18,84 @@
       >
         {{ isSelectionMode ? "Exit Selection Mode" : "Enter Selection Mode" }}
       </button>
+    </div> -->
+
+    <!-- Tab Navigation -->
+    <div class="border-b border-gray-200">
+      <nav class="flex space-x-4 px-6" role="tablist">
+        <button
+          *ngFor="let tab of tabs"
+          [attr.aria-selected]="activeTab === tab.id"
+          [attr.aria-controls]="tab.id + '-panel'"
+          role="tab"
+          (click)="setActiveTab(tab.id)"
+          class="px-3 py-2 text-sm font-medium rounded-t-lg transition-colors"
+          [ngClass]="
+            activeTab === tab.id
+              ? 'border-b-2 border-blue-500 text-blue-600'
+              : 'text-gray-500 hover:text-gray-700'
+          "
+        >
+          {{ tab.label }}
+        </button>
+      </nav>
     </div>
 
-    <div class="relative">
-      <!-- Loading State -->
-      <div
-        *ngIf="!iframeLoaded"
-        class="absolute inset-0 bg-gray-50 flex items-center justify-center"
-      >
-        <div class="text-center">
-          <div
-            class="animate-spin rounded-full h-12 w-12 border-b-2 border-black mx-auto"
-          ></div>
-          <p class="mt-4 text-gray-600">Loading website preview...</p>
+    <!-- Tab Panels -->
+    <div
+      class="relative"
+      role="tabpanel"
+      [attr.aria-labelledby]="'tab-' + activeTab"
+    >
+      <!-- Website Preview Panel -->
+      <div *ngIf="activeTab === 'preview'" class="relative">
+        <div
+          class="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-100"
+        >
+          <div class="text-2xl font-semibold">Select Elements</div>
+          <button
+            (click)="toggleSelectionMode()"
+            [class.bg-blue-600]="isSelectionMode"
+            class="px-4 py-2 rounded-lg transition-colors text-white"
+            [ngClass]="{
+              'bg-black hover:bg-gray-800': isSelectionMode,
+              'bg-blue-600 hover:bg-blue-700': !isSelectionMode,
+            }"
+          >
+            {{
+              isSelectionMode ? "Exit Selection Mode" : "Enter Selection Mode"
+            }}
+          </button>
         </div>
+
+        <!-- Loading State -->
+        <div
+          *ngIf="!iframeLoaded"
+          class="absolute inset-0 bg-gray-50 flex items-center justify-center"
+        >
+          <div class="text-center">
+            <div
+              class="animate-spin rounded-full h-12 w-12 border-b-2 border-black mx-auto"
+            ></div>
+            <p class="mt-4 text-gray-600">Loading website preview...</p>
+          </div>
+        </div>
+
+        <!-- Website Preview Iframe -->
+        <iframe
+          [src]="iframeUrl"
+          class="w-full h-[calc(100vh-27rem)] border-0"
+          sandbox="allow-same-origin allow-scripts allow-forms allow-popups"
+          (load)="onIframeLoad()"
+        ></iframe>
       </div>
 
-      <!-- Website Preview Iframe -->
-      <iframe
-        [src]="iframeUrl"
-        class="w-full h-[calc(100vh-27rem)] border-0"
-        sandbox="allow-same-origin allow-scripts allow-forms allow-popups"
-        (load)="onIframeLoad()"
-      ></iframe>
+      <!-- Products Panel -->
+      <div *ngIf="activeTab === 'products'" class="p-6">
+        <app-product-list
+          (allSelectedProducts)="parseProducts($event)"
+        ></app-product-list>
+      </div>
     </div>
   </div>
 
@@ -104,10 +157,9 @@
       <!-- Submit Button -->
       <div *ngIf="experimentParams.selectedElements.length > 0" class="mt-6">
         <button
-          (click)="handleSubmit()"
           class="w-full px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors flex items-center justify-center gap-2"
         >
-          <span>Continue with Selected Elements</span>
+          <span>Create Experiment</span>
           <lucide-icon name="arrow-right" class="h-4 w-4"></lucide-icon>
         </button>
       </div>
