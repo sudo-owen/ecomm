@@ -20,7 +20,7 @@
           </p>
         </div>
         <div class="flex flex-col gap-2 min-[400px]:flex-row">
-          <button [ngClass]="(theme$ | async)?.heroSection?.ctaButton">
+          <button [ngClass]="(theme$ | async)?.heroSection?.ctaButton" routerLink="/products">
             Shop Now
           </button>
         </div>

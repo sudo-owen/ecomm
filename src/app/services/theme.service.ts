@@ -18,8 +18,8 @@ export class ThemeService {
 
   init() {
     return this.api.getTheme().pipe(
-      map((response) => {
-        this.currentTheme.next(response.body as AppTheme);
+      map((theme) => {
+        this.currentTheme.next(theme);
         return true;
       }),
       catchError(() => of(false))

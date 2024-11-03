@@ -15,30 +15,34 @@ export class ApiService {
 
   private loadingSubject = new BehaviorSubject<boolean>(false);
   private errorSubject = new BehaviorSubject<boolean>(false);
+  
+  sessionIdSet: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
   loading$ = this.loadingSubject.asObservable();
   error$ = this.errorSubject.asObservable();
+  hasVisitSent: boolean = false;
 
-  getProducts(): Observable<Product[]> {
-    return this.http.get<Product[]>(`${this.apiUrl}/products`);
+  getProducts(): Observable<HttpResponse<Product[]>> {
+    return this.http.get<Product[]>(`${this.apiUrl}/products`, { observe: 'response' })
+      .pipe(
+        tap((response) => {
+          const sessionId = response.headers.get('X-Ddd-Session-Id');
+          if (sessionId) {
+            this.sessionId = sessionId;
+            this.sessionIdSet.next(true);
+          }
+        })
+      );
   }
 
   getProduct(id: number): Observable<Product> {
     return this.http.get<Product>(`${this.apiUrl}/products/${id}`);
   }
 
-  getTheme(): Observable<HttpResponse<AppTheme>> {
-    return this.http
-      .get<AppTheme>(`${this.apiUrl}/themes`, { observe: 'response' })
-      .pipe(
-        tap((response) => {
-          const sessionId = response.headers.get('X-Ddd-Session-Id');
-          if (sessionId) {
-            this.sessionId = sessionId;
-          }
-        }),
-      );
+  getTheme(): Observable<AppTheme> {
+    return this.http.get<AppTheme>(`${this.apiUrl}/themes`);
   }
+
 
   generateVariations(productId: number): Observable<Product> {
     return this.http.get<Product>(
@@ -62,11 +66,25 @@ export class ApiService {
     return this.http.get(`${this.apiUrl}/ab-test-results`);
   }
 
-  recordVariantVisit() {
-    return this.http.put<void>(
-      `${this.apiUrl}/variant/${this.sessionId}/visit`,
-      {},
-    );
+  async recordVariantVisit(): Promise<void> {
+    if (this.hasVisitSent) {
+      return;
+    }
+    this.hasVisitSent = true;
+    try {
+      const response = await fetch(`${this.apiUrl}/variant/${this.sessionId}/visit`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+    } catch (error) {
+      console.error('Error recording variant visit:', error);
+      throw error;
+    }
   }
 
   getSessionId(): string | null {

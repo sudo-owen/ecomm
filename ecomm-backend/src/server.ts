@@ -125,7 +125,9 @@ interface AppTheme {
 
 
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+  exposedHeaders: ['X-Ddd-Session-Id']
+}));
 app.use('/public', express.static(join(__dirname, 'public')));
 
 const PRODUCT_FILE = join(__dirname, 'public', 'data', 'products.json');

@@ -70,12 +70,12 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
   }
 
   loadVariations() {
-    this.abTestService.getVariation(this.product, 'descriptions').subscribe(description => {
-      this.description = description;
-    });
-    this.abTestService.getVariation(this.product, 'imageUrls').subscribe(imageUrl => {
-      this.imageUrl = imageUrl;
-    });
+    // this.abTestService.getVariation(this.product, 'descriptions').subscribe(description => {
+    //   this.description = description;
+    // });
+    // this.abTestService.getVariation(this.product, 'imageUrls').subscribe(imageUrl => {
+    //   this.imageUrl = imageUrl;
+    // });
   }
 
   addToCart(): void {

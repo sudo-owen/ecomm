@@ -38,6 +38,8 @@ export class ProductGridComponent implements OnInit, OnDestroy {
           this.productService.restockProduct(productId, quantity);
         }),
     );
+
+    // Record we visited
     this.api.recordVariantVisit();
   }
 
