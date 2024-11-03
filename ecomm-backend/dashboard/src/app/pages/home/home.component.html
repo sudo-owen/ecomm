@@ -64,23 +64,20 @@
 
           <div class="space-y-2">
             <div class="flex justify-between text-sm">
-              <span class="text-gray-600">Conversions</span>
-              <span class="font-medium">{{ experiment.conversions }}</span>
+              <span class="text-gray-600">Total Conversions</span>
+              <span class="font-medium">{{ getTotalConversions(experiment) }}</span>
             </div>
             <div class="flex justify-between text-sm">
-              <span class="text-gray-600">Impressions</span>
-              <span class="font-medium">{{ experiment.impressions }}</span>
+              <span class="text-gray-600">Total Impressions</span>
+              <span class="font-medium">{{ getTotalImpressions(experiment) }}</span>
             </div>
             <div class="flex justify-between text-sm">
-              <span class="text-gray-600">Conversion Rate</span>
-              <span class="font-medium"
-                >{{
-                  getConversionRate(
-                    experiment.conversions,
-                    experiment.impressions
-                  )
-                }}%</span
-              >
+              <span class="text-gray-600">Avg. Conversion Rate</span>
+              <span class="font-medium">{{ getAverageConversionRate(experiment) | number:'1.2-2' }}%</span>
+            </div>
+            <div class="flex justify-between text-sm">
+              <span class="text-gray-600">Best Conversion Rate</span>
+              <span class="font-medium">{{ getBestConversionRate(experiment) | number:'1.2-2' }}%</span>
             </div>
           </div>
         </div>

@@ -1,7 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, BehaviorSubject } from 'rxjs';
-
 export interface Product {
   id: number;
   name: string;
@@ -19,6 +18,14 @@ export interface ProductVariations {
   imageUrls: string[];
 }
 
+export interface ABTestConfig {
+  id: number;
+  enabled: boolean;
+  productId: number;
+  type: string;
+  product: Product;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -34,5 +41,9 @@ export class ApiService {
 
   getProducts(): Observable<Product[]> {
     return this.http.get<Product[]>(`${this.apiUrl}/products`);
+  }
+
+  getABTestConfigs(): Observable<ABTestConfig[]> {
+    return this.http.get<ABTestConfig[]>(`${this.apiUrl}/ab-test-configs`);
   }
 }

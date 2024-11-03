@@ -4,7 +4,7 @@ import { readFile, writeFile } from "fs/promises";
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { PrismaClient, Prisma } from '@prisma/client'
-import { generateProductVariations, getProductImageVariations, generateProductImage, generateThemeVariations } from '../llm/ai_variation_engine';
+import { generateProductVariations, getProductImageVariations, generateProductImage, generateThemeVariations, generateExperimentNameDescription } from '../llm/ai_variation_engine';
 import * as crypto from 'crypto';
 import cors from "cors";
 
@@ -277,7 +277,7 @@ async function generateVariants(product: Product) {
 
     newVariants.push(...imageVariants);
 
-    console.log("newVariants: " + JSON.stringify(newVariants, null, 2));
+    // console.log("newVariants: " + JSON.stringify(newVariants, null, 2));
     return newVariants;
 }
 
@@ -364,7 +364,7 @@ async function getProductWithVariant(product: Product, session_id: string) {
   });
 
   if (variant) {
-    console.log(`Variant(${variant.id}) for product(${product.id}) session(${session_id})`);
+    // console.log(`Variant(${variant.id}) for product(${product.id}) session(${session_id})`);
     
     const changes = JSON.parse(variant.changes);
     //console.log(`Changes (${product.id}): `, changes);
@@ -384,7 +384,7 @@ async function getProductWithVariant(product: Product, session_id: string) {
         id: 'asc'
       }
     });
-    console.log('Variants: ', variants);
+    // console.log('Variants: ', variants);
 
     let random = Math.random();
 
@@ -508,6 +508,8 @@ async function generateABTest(config, abTest) {
       v => variantToDatabaseVariant(v, abTest.id)
     );
 
+    const {name, description} = await generateExperimentNameDescription(config.product, variants);
+
     // TODO: name and description
     const newABTest = await prisma.abTest.update({
       where: {
@@ -517,7 +519,9 @@ async function generateABTest(config, abTest) {
         variants: {
           create: databaseVariants
         },
-        status: 'ongoing'
+        status: 'ongoing',
+        name: name,
+        description: description
       }
     });
 
@@ -626,7 +630,9 @@ function catchErrorsDecorator(func: any) {
 // API for dashboard ---------------------------------------
 app.get('/api/ab-test-configs', catchErrorsDecorator(
   async (req: Request, res: Response) => {
-  const configs = await prisma.productAbConfig.findMany();
+  const configs = await prisma.productAbConfig.findMany(
+    {include: {product: true}}
+  );
   res.status(200).json(configs);
   }
 ));
@@ -717,10 +723,35 @@ app.put('/api/ab-test-configs/:type/:id', catchErrorsDecorator(
 
 }));
 
-app.get('/api/ab-test', catchErrorsDecorator(
+app.get('/api/ab-tests', catchErrorsDecorator(
   async (req: Request, res: Response) => {
-    const abTests = await prisma.abTest.findMany();
+    const abTests = await prisma.abTest.findMany({include: {variants: true}});
+    // console.log(abTests);
     res.status(200).json(abTests);
+  }
+));
+
+app.get('/api/ab-test/:id', catchErrorsDecorator(
+  async (req: Request, res: Response) => {
+    const abTestId = parseInt(req.params.id);
+    if (!abTestId) {
+      return res.status(400).json({ message: 'Invalid A/B test id' });
+    }
+
+    const abTest = await prisma.abTest.findUnique(
+      {
+        where: {
+          id: abTestId
+        },
+        include: {
+          variants: true
+        }
+      }
+    );
+    if (!abTest) {
+      return res.status(404).json({ message: 'A/B test not found' });
+    }
+    res.status(200).json(abTest);
   }
 ));
 
