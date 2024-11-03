@@ -5,7 +5,6 @@ import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { PrismaClient, Prisma } from '@prisma/client'
 import { generateProductVariations, getProductImageVariations, generateProductImage, generateThemeVariations, generateExperimentNameDescription } from '../llm/ai_variation_engine';
-import * as crypto from 'crypto';
 import cors from "cors";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -825,7 +824,7 @@ app.put('/api/variant/visit', catchErrorsDecorator(
     } else {
 
       await prisma.productVariant.update({
-        where: { 
+        where: {
           id: variant.id
         },
         data: {
@@ -836,9 +835,7 @@ app.put('/api/variant/visit', catchErrorsDecorator(
       });
     }
 
-    res.status(200).json({ message: 'Visit recorded' });
-
-
+    return res.status(200).json({ message: 'Visit recorded successfully' });
   }
 ));
 
@@ -891,7 +888,7 @@ app.put('/api/variant/conversion', catchErrorsDecorator(
       console.log("Conversion for variant: " + variant.id)
 
       await prisma.productVariant.update({
-        where: { 
+        where: {
           id: variant.id
         },
         data: {
@@ -901,7 +898,8 @@ app.put('/api/variant/conversion', catchErrorsDecorator(
         }
       });
     }
-    res.status(200).json({ message: 'Conversion recorded' });
+
+    return res.status(200).json({ message: 'Conversion recorded successfully' });
   }
 ));
 
