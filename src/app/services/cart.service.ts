@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { CartItem } from '../models/interfaces';
 import { Product } from '../models/interfaces';
+import { ApiService } from './api.service';
 
 @Injectable({
   providedIn: 'root',
@@ -15,7 +16,7 @@ export class CartService {
     quantity: number;
   }>();
 
-  constructor() {}
+  constructor(private api: ApiService) {}
 
   getCart(): Observable<CartItem[]> {
     return this.cartSubject.asObservable();
@@ -33,6 +34,9 @@ export class CartService {
     }
 
     this.cartSubject.next([...this.cartItems]);
+
+    // Record conversion
+    this.api.recordVariantConversion();
   }
 
   updateQuantity(productId: number, newQuantity: number): void {

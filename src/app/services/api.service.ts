@@ -87,6 +87,23 @@ export class ApiService {
     }
   }
 
+  async recordVariantConversion(): Promise<void> {
+    try {
+      const response = await fetch(`${this.apiUrl}/variant/${this.sessionId}/conversion`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+    } catch (error) {
+      console.error('Error recording variant visit:', error);
+      throw error;
+    }
+  }
+
   getSessionId(): string | null {
     return this.sessionId;
   }
