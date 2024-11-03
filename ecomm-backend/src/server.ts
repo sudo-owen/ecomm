@@ -4,7 +4,7 @@ import { readFile, writeFile } from "fs/promises";
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { PrismaClient, Prisma } from '@prisma/client'
-import { generateProductVariations, getProductImageVariations, generateProductImage, generateThemeVariations } from '../llm/ai_variation_engine';
+import { generateProductVariations, getProductImageVariations, generateProductImage, generateThemeVariations , generateExperimentNameDescription } from '../llm/ai_variation_engine';
 import * as crypto from 'crypto';
 import cors from "cors";
 
@@ -508,6 +508,8 @@ async function generateABTest(config, abTest) {
       v => variantToDatabaseVariant(v, abTest.id)
     );
 
+    const {name, description} = await generateExperimentNameDescription(abTest, variants);
+
     // TODO: name and description
     const newABTest = await prisma.abTest.update({
       where: {
@@ -517,7 +519,9 @@ async function generateABTest(config, abTest) {
         variants: {
           create: databaseVariants
         },
-        status: 'ongoing'
+        status: 'ongoing',
+        name,
+        description
       }
     });
 
