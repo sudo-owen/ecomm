@@ -734,7 +734,7 @@ app.put('/api/variant/:id/visit', catchErrorsDecorator(
     if (!variantId) {
       return res.status(400).json({ message: 'Invalid variant id' });
     }
-
+    console.log('Variant visit: ', variantId);
     await prisma.productVariant.update({
       where: { id: variantId },
       data: {
