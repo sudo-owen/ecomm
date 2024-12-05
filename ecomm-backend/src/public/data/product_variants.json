@@ -2,5 +2,55 @@
   "metadata": {
     "id": 7
   },
-  "data": []
+  "data": [
+    {
+      "id": 0,
+      "productId": 1,
+      "changes": {
+        "fullDescription": "Classic cotton t-shirt featuring a timeless crew neck design and short sleeves. Simple care requirements include post-wash ironing. Single color option with minimal stretch for a traditional fit."
+      }
+    },
+    {
+      "id": 1,
+      "productId": 1,
+      "changes": {
+        "fullDescription": "Essential crew neck t-shirt crafted from pure cotton fabric. Features short sleeves and a classic fit with light stretch. Maintain crisp appearance with regular ironing after washing."
+      }
+    },
+    {
+      "id": 2,
+      "productId": 1,
+      "changes": {
+        "fullDescription": "Versatile cotton t-shirt designed with simplicity in mind. Short-sleeved style with traditional crew neck. Minimal stretch ensures consistent fit. Includes care instructions for optimal maintenance."
+      }
+    },
+    {
+      "id": 3,
+      "productId": 1,
+      "changes": {
+        "fullDescription": "Embrace the art of minimalism with our essential cotton t-shirt. In a world of excess, this thoughtfully designed piece strips away the unnecessary, leaving you with pure, uncomplicated style. Its classic crew neck and short sleeves represent the cornerstone of mindful dressing – where less truly becomes more."
+      }
+    },
+    {
+      "id": 4,
+      "productId": 1,
+      "changes": {
+        "fullDescription": "Dear Diary, Today I became someone's favorite t-shirt again. They chose me for my simple charm - my cotton threads, my humble crew neck, my reliable short sleeves. Sure, I need a bit of ironing after wash day, but don't we all need some self-care? I may be just one color, but I'm ready to be part of countless stories. Will I be part of yours?"
+      }
+    },
+    {
+      "id": 5,
+      "productId": 1,
+      "changes": {
+        "imageUrl": {}
+      }
+    },
+    {
+      "id": 6,
+      "productId": 1,
+      "changes": {
+        "imageUrl": {}
+      }
+    }
+  ]
 }

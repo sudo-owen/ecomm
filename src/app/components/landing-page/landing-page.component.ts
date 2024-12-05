@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgClass } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -16,7 +16,7 @@ import { FeatureCardComponent } from '../feature-card/feature-card.component';
   templateUrl: './landing-page.component.html',
   styleUrls: ['./landing-page.component.css'],
   standalone: true,
-  imports: [CommonModule, TestimonialCardComponent, ProductCardComponent, RouterLink, FeatureCardComponent],
+  imports: [CommonModule, TestimonialCardComponent, ProductCardComponent, RouterLink, FeatureCardComponent, NgClass],
 })
 export class LandingPageComponent implements OnInit {
   featuredProducts$: Observable<Product[]> = of([]);

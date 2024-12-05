@@ -35,19 +35,10 @@ The backend must run on port 3000: `http://localhost:3000`
 From the `ecomm-backend` directory
 
 ```
-npx ng serve dashboard
+npm run dashboard
 ```
 
-The dashboard can run on any available port. It will automatically connect to the frontend running on port 4200.
-
-## Important Notes
-
-- The frontend must run on port 4200 for the A/B testing functionality to work
-- Start the applications in this order:
-  1. Frontend (port 4200)
-  2. Backend server
-  3. Dashboard (any port)
-- The dashboard needs both the frontend and backend to be running to function properly
+The dashboard runs on port 4201.
 
 ## Development
 

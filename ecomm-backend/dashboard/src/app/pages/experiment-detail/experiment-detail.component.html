@@ -19,16 +19,16 @@
         <span class="font-semibold">Status:</span> {{ experimentData.status }}
       </p>
       <p>
-        <span class="font-semibold">Start Date:</span>
-        {{ experimentData.startDate }}
-      </p>
-      <p>
-        <span class="font-semibold">End Date:</span>
-        {{ experimentData.endDate }}
-      </p>
-      <p>
         <span class="font-semibold">Description:</span>
         {{ experimentData.description }}
+      </p>
+      <p>
+        <span class="font-semibold">Product:</span>
+        {{ experimentData.product.name }}
+      </p>
+      <p>
+        <span class="font-semibold">Original Content:</span>
+        {{ experimentData.product.fullDescription }}
       </p>
     </div>
   </div>
@@ -44,9 +44,19 @@
           *ngFor="let variant of experimentData.variants"
           class="border border-gray-200 rounded-lg p-6 space-y-4"
         >
-          <h4 class="text-xl font-semibold">{{ variant.name }}</h4>
+        <h4 class="text-xl font-semibold mb-3">Changes:</h4>
+        <ul class="list-disc pl-5 space-y-2">
+          <ng-container *ngFor="let change of getChanges(variant.changes)">
+              <ng-container [ngSwitch]="change.key">
+                <span *ngSwitchCase="'imageUrl'">
+                  <img [src]="'http://localhost:3000' + change.value" alt="New product image" class="mt-2 max-w-full h-auto rounded">
+                </span>
+                <span *ngSwitchDefault>Description: {{ change.value }}</span>
+              </ng-container>
+          </ng-container>
+        </ul>
 
-          <div class="space-y-3">
+          <div class="space-y-3 mt-4">
             <div class="flex justify-between items-center">
               <span>Conversions</span>
               <span class="font-medium">{{ variant.conversions }}</span>
@@ -54,7 +64,7 @@
 
             <div class="flex justify-between items-center">
               <span>Impressions</span>
-              <span class="font-medium">{{ variant.impressions }}</span>
+              <span class="font-medium">{{ variant.visits }}</span>
             </div>
 
             <div class="flex justify-between items-center">
@@ -63,7 +73,7 @@
                 >{{
                   calculateConversionRate(
                     variant.conversions,
-                    variant.impressions
+                    variant.visits
                   )
                 }}%</span
               >
@@ -78,7 +88,7 @@
                 [style.width]="
                   calculateConversionRate(
                     variant.conversions,
-                    variant.impressions
+                    variant.visits
                   ) + '%'
                 "
               ></div>
@@ -97,20 +107,15 @@
     <div class="p-6 space-y-3">
       <p>
         <span class="font-semibold">Total Impressions:</span>
-        {{ experimentData.impressions }}
+        {{ getTotalImpressions() }}
       </p>
       <p>
         <span class="font-semibold">Total Conversions:</span>
-        {{ experimentData.conversions }}
+        {{ getTotalConversions() }}
       </p>
       <p>
-        <span class="font-semibold">Overall Conversion Rate:</span>
-        {{
-          calculateConversionRate(
-            experimentData.conversions,
-            experimentData.impressions
-          )
-        }}%
+        <span class="font-semibold">Best Performing Conversion Rate:</span>
+        {{ getBestConversionRate(experimentData.variants) }}%
       </p>
     </div>
   </div>

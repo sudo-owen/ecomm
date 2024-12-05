@@ -15,6 +15,52 @@ const openai = new OpenAI({
   apiKey: process.env["OPENAI_API_KEY"],
 });
 
+interface ExperimentNameDescription {
+  name: string;
+  description: string;
+}
+
+async function generateExperimentNameDescription(item: any, varients: any[]): Promise<ExperimentNameDescription> {
+  const prompt =  "You are working on an AB testing framework. Your task is to generate an experiment name " +
+  "and description based on the provided item and its variants.\n\nFirst, examine the following item:\n<item>\n" +
+  JSON.stringify(item) + "\n</item>\n\nNow, consider the following variants:\n<variants>\n" +
+  JSON.stringify(varients) + "\n</variants>\n\nAnalyze the item and its variants carefully. Pay attention to the changes proposed in the variants and how they differ from the original item.\n\nTo create an experiment name:\n1. Identify the key aspect being tested (e.g., description style, pricing, layout)\n2. Keep it concise and descriptive\n3. Must be between 3 and 7 words. Mention the product name in the name.\n\nTo create an experiment description:\n1. Briefly explain the purpose of the experiment\n2. Mention the element being varied\n3. Describe the potential impact on user behavior or metrics\n4. Keep it under 2-3 sentences\n\nAfter your analysis, provide an experiment name and description. Format your response as follows:\n\n<experiment_name>\n[Your proposed experiment name here]\n</experiment_name>\n\n<experiment_description>\n[Your proposed experiment description here]\n</experiment_description>\n\nEnsure that your experiment name and description are relevant to the item and variants provided, and that they accurately reflect the nature of the AB test being conducted."
+
+
+    const msg = await anthropic.messages.create({
+      model: "claude-3-5-sonnet-20241022",
+      max_tokens: 1000,
+      temperature: 0.1,
+      messages: [
+        {
+          "role": "user",
+          "content": [
+            {
+              "type": "text",
+              "text": prompt
+            }
+          ]
+        }
+      ]
+    });
+
+    const content = msg.content[0].type === 'text' ? msg.content[0].text : '';
+    const nameMatch = content.match(/<experiment_name>([\s\S]*?)<\/experiment_name>/);
+    const descriptionMatch = content.match(/<experiment_description>([\s\S]*?)<\/experiment_description>/);
+  
+    if (!nameMatch || !descriptionMatch) {
+      throw new Error("Failed to extract experiment name or description from the response");
+    }
+  
+    return {
+      name: nameMatch[1].trim(),
+      description: descriptionMatch[1].trim()
+    };
+}
+
+
+
+
 async function generateThemeVariations(elementName: string, themeParms: object): Promise<object> {
   const prompt ="You are an expert UI/UX designer tasked with generating style variations for web components to optimize user " +
   "engagement and conversion rates through A/B testing. Your goal is to create subtle yet impactful changes that can potentially " +
@@ -97,7 +143,7 @@ async function generateProductVariations(productDescription: string): Promise<st
   const msg = await anthropic.messages.create({
   model: "claude-3-5-sonnet-20241022",
   max_tokens: 1000,
-  temperature: 0,
+  temperature: 0.1,
   messages: [
       {
       "role": "user",
@@ -130,8 +176,12 @@ async function generateProductVariations(productDescription: string): Promise<st
   }
 
   // Parse the JSON string
-  const variations: string[] = Object.values(JSON.parse(jsonString));
-  return variations;
+  try {
+    const variations: string[] = Object.values(JSON.parse(jsonString));
+    return variations;
+  } catch (error) {
+    throw new Error("Failed to parse JSON from the response response: " + jsonString + error);
+  }
 }
 
 async function getProductImageVariations(productDescription: string): Promise<string[]> {
@@ -142,7 +192,7 @@ async function getProductImageVariations(productDescription: string): Promise<st
   const msg = await anthropic.messages.create({
     model: "claude-3-5-sonnet-20241022",
     max_tokens: 1000,
-    temperature: 0,
+    temperature: 0.1,
     messages: [
         {
         "role": "user",
@@ -194,15 +244,19 @@ async function generateProductImage(description: string, saveFolder: string): Pr
       // Download the image
       const imageResponse = await axios.get(imageUrl, { responseType: 'arraybuffer' });
       await fs.writeFile(imagePath, imageResponse.data);
-  
-      console.log(`Image saved to: ${imagePath}`);
-  
-      // Return the relative path to be used in your application
-      return `/public/${imageName}`;
+    
+      // Return the path starting from /public
+      const publicIndex = imagePath.indexOf('public');
+      if (publicIndex === -1) {
+        throw new Error("Unable to find 'public' in the image path");
+      }
+      const relativePath = imagePath.slice(publicIndex);
+      return `/${relativePath.replace(/\\/g, '/')}`;
     } catch (error) {
       console.error(`Failed to generate or save image for ${description}:`, error);
       return ''; // Return an empty string or a default image path in case of error
     }
   }
 
-export { generateProductVariations, getProductImageVariations, generateProductImage, generateThemeVariations };
+export { generateExperimentNameDescription, generateProductVariations, getProductImageVariations, generateProductImage, generateThemeVariations };
+ 

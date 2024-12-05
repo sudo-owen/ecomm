@@ -1,21 +1,28 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { LucideAngularModule, Target, Trash2 } from 'lucide-angular';
+import { ArrowRight, Crosshair, LucideAngularModule, Target, Trash2 } from 'lucide-angular';
 import { Subscription } from 'rxjs';
-import { IframeCommunicationService } from '../../services/iframe-communication.service';
+import { ProductListComponent } from '../../components/product-list/product-list.component/product-list.component';
+import { Experiment } from '../../models/experiment.interface';
 import {
   ExperimentParams,
   SelectedElement,
 } from '../../models/selected-element.interface';
-import { Experiment } from '../../models/experiment.interface';
+import { IframeCommunicationService } from '../../services/iframe-communication.service';
+import { Product, ApiService } from '../../services/api.service';
+
+interface Tab {
+  id: string;
+  label: string;
+}
 
 @Component({
   selector: 'app-create-experiment',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule],
+  imports: [CommonModule, FormsModule, LucideAngularModule, ProductListComponent],
   templateUrl: './create-experiment.component.html',
-  styleUrls: ['./create-experiment.component.css'],
+  styleUrls: ['./create-experiment.component.css']
 })
 export class CreateExperimentComponent implements OnInit, OnDestroy {
   generatedExperiment: Experiment | null = null;
@@ -23,8 +30,17 @@ export class CreateExperimentComponent implements OnInit, OnDestroy {
   iframeUrl;
   isSelectionMode = false;
   iframeLoaded = false;
-  icons = { Target, Trash2 };
+  icons = { Target, Trash2, Crosshair, ArrowRight};
   private subscription = new Subscription();
+
+  @ViewChild(ProductListComponent) productListComponent!: ProductListComponent;
+
+  tabs: Tab[] = [
+    { id: 'preview', label: 'Website Preview' },
+    { id: 'products', label: 'Products' }
+  ];
+  
+  activeTab: string = 'products';
 
   experimentParams: ExperimentParams = {
     duration: '7',
@@ -33,7 +49,10 @@ export class CreateExperimentComponent implements OnInit, OnDestroy {
     selectedElements: [],
   };
 
-  constructor(private iframeService: IframeCommunicationService) {
+  constructor(
+    private iframeService: IframeCommunicationService,
+    private apiService: ApiService
+  ) {
     this.iframeUrl = this.iframeService.getIframeUrl();
   }
 
@@ -53,6 +72,8 @@ export class CreateExperimentComponent implements OnInit, OnDestroy {
         }
       }),
     );
+
+    this.fetchAndPreSelectActiveConfigs();
   }
 
   ngOnDestroy() {
@@ -64,9 +85,6 @@ export class CreateExperimentComponent implements OnInit, OnDestroy {
     this.iframeService.handleIframeMessage(event);
   }
 
-  onIframeLoad() {
-    this.iframeLoaded = true;
-  }
 
   toggleSelectionMode() {
     this.isSelectionMode = !this.isSelectionMode;
@@ -82,6 +100,15 @@ export class CreateExperimentComponent implements OnInit, OnDestroy {
     );
     if (index !== -1) {
       this.experimentParams.selectedElements.splice(index, 1);
+
+      // Check if it's a product element and toggle it in the ProductListComponent
+      if (element.selector.startsWith('data-product-')) {
+        const productId = element.selector.replace('data-product-', '');
+        const product = this.productListComponent.productsSubject.value.find(p => p.id.toString() === productId);
+        if (product) {
+          this.productListComponent.toggleProduct(product);
+        }
+      }
     }
   }
 
@@ -91,33 +118,60 @@ export class CreateExperimentComponent implements OnInit, OnDestroy {
 
   async handleSubmit() {
     this.isLoading = true;
-    try {
-      this.generatedExperiment = await this.generateExperiment(
-        1,
-        'description',
-      );
-    } catch (error) {
-      console.error('Failed to generate experiment:', error);
-    } finally {
-      this.isLoading = false;
-    }
   }
 
-  private async generateExperiment(
-    productId: number,
-    changeType: string,
-  ): Promise<Experiment> {
-    const response = await fetch('http://localhost:3000/api/create-ab-test', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        productId,
-        name: `Experiment for Product ${productId}`,
-        description: `A/B test for ${changeType} of product ${productId}`,
-      }),
-    });
+  setActiveTab(tabId: string): void {
+    this.activeTab = tabId;
+  }
 
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-    return response.json();
+  parseProducts(p: Product[]) {
+    // Remove all existing products from the experiment, then add in these
+    // A product element is one which starts with the data tag <product>
+    this.experimentParams.selectedElements = this.experimentParams.selectedElements.filter(
+      (e) => !e.selector.startsWith('data-product-'),
+    );
+    p.forEach((product) => {
+      this.experimentParams.selectedElements.push({
+        selector: `data-product-${product.id}`,
+        originalContent: product.name,
+        location: 'Product',
+      });
+    });
+  }
+
+
+  fetchAndPreSelectActiveConfigs() {
+    this.apiService.getABTestConfigs().subscribe(
+      (configs) => {
+        const activeConfigs = configs.filter(config => config.enabled);
+        const activeExperiments: SelectedElement[] = [];
+
+        activeConfigs.forEach(config => {
+          const productElement: SelectedElement = {
+            selector: `data-product-${config.productId}`,
+            originalContent: "",
+            location: `${config.product.name}`,
+          };
+          this.experimentParams.selectedElements.push(productElement);
+          activeExperiments.push(productElement);
+          
+          // Pre-select the product in the ProductListComponent
+          const product = this.productListComponent.productsSubject.value.find(p => p.id === config.productId);
+          if (product) {
+            this.productListComponent.toggleProduct(product);
+          }
+        });
+
+        
+      },
+      (error) => {
+        console.error('Error fetching AB test configs:', error);
+      }
+    );
+  }
+  
+  onIframeLoad() {
+    this.iframeLoaded = true;
+    // When the iframe is loaded, update it with the active experiments
   }
 }

@@ -1,0 +1,77 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Product {
+  id              Int      @id @default(autoincrement())
+  name            String
+  price           Float
+  description     String
+  imageUrl        String
+  stock           Int
+  category        String
+  fullDescription String
+  variants        ProductVariant[]
+  abConfig       ProductAbConfig[] 
+}
+
+model Session {
+  id              String  @id @default(uuid()) @unique
+  createdAt       DateTime @default(now())
+  productVariants ProductVariant[]
+  defaultAbTests  AbTest[]
+}
+
+model ProductVariant {
+  id        Int     @id @default(autoincrement())
+  productId Int
+  abTestId  Int     
+  changes   String  // Store JSON string of changes
+  product   Product @relation(fields: [productId], references: [id])
+
+  visits      Int    @default(0)
+  conversions Int   @default(0)
+
+  abTest    AbTest  @relation(fields: [abTestId], references: [id])
+  sessions  Session[]
+}
+
+model ProductAbConfig {
+  id          Int     @id @default(autoincrement())
+  enabled     Boolean
+  productId   Int
+  type        String  @default("description")
+
+  product     Product @relation(fields: [productId], references: [id])
+  abTests     AbTest[]
+
+  @@unique([productId, type])
+}
+
+model AbTest {
+  id          Int      @id @default(autoincrement())
+  configId    Int
+  name        String
+  description String
+  status      String
+
+  defaultConversions Int @default(0)
+  defaultVisits Int @default(0)
+
+  productBlob String 
+
+  abConfig    ProductAbConfig @relation(fields: [configId], references: [id])
+  variants             ProductVariant[]   // Store JSON array of variant IDs
+  sessionsWithDefault   Session[]
+}

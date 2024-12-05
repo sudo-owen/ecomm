@@ -16,12 +16,15 @@ export class ProductService {
 
   init() {
     return this.api.getProducts().pipe(
-      map((x) => {
-        this.products = x;
-        this.productsSubject.next(x);
-        return true;
-      }), // Convert successful response to true
-      catchError(() => of(false)) // Convert error to false
+      map((response) => {
+        if (response.body) {
+          this.products = response.body;
+          this.productsSubject.next(this.products);
+          return true;
+        }
+        return false;
+      }),
+      catchError(() => of(false))
     );
   }
 

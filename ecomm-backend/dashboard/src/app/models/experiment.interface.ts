@@ -1,7 +1,13 @@
 interface Variant {
-  name: string;
-  impressions: number;
+  changes: string;
+  visits: number;
   conversions: number;
+}
+
+export interface ExperimentWithProduct extends Experiment {
+  defaultVisits: number;
+  defaultConversions: number;
+  product: any;
 }
 
 export interface Experiment {
